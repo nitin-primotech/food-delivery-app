@@ -41,7 +41,7 @@ export function ServiceGrid() {
           >
             {'badge' in svc && svc.badge ? (
               <View style={styles.badge}>
-                <PremiumText variant="overline" color={colors.textInverse}>
+                <PremiumText variant="overline" color={colors.textPrimary}>
                   {svc.badge}
                 </PremiumText>
               </View>
@@ -49,11 +49,11 @@ export function ServiceGrid() {
             <AppSymbol
               name={svc.icon}
               size={28}
-              tintColor={isActive ? colors.primary : colors.textInverse}
+              tintColor={isActive ? colors.primary : colors.textPrimary}
             />
             <PremiumText
               variant="label"
-              color={isActive ? colors.primary : colors.textInverse}
+              color={isActive ? colors.primary : colors.textPrimary}
             >
               {svc.label}
             </PremiumText>
@@ -83,9 +83,9 @@ const styles = StyleSheet.create({
     boxShadow: '0 8px 28px rgba(0, 0, 0, 0.22)',
   },
   tileInactive: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: colors.backgroundMuted,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.18)',
+    borderColor: colors.border,
   },
   badge: {
     position: 'absolute',

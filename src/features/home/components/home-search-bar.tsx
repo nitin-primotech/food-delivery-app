@@ -27,7 +27,7 @@ export function HomeSearchBar() {
           color={colors.textSecondary}
           style={styles.placeholder}
         >
-          Search for &apos;Truffle burger&apos;
+          Search here...
         </PremiumText>
         <View style={styles.micWrap}>
           <AppSymbol name="mic.fill" size={18} tintColor={colors.primary} />
@@ -61,13 +61,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.backgroundElevated,
+    backgroundColor: colors.backgroundMuted,
     borderRadius: radius.xl,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     gap: spacing.sm,
     borderCurve: 'continuous',
-    boxShadow: '0 6px 24px rgba(0, 0, 0, 0.12)',
+    borderWidth: 1,
+    borderColor: colors.border,
+    boxShadow: '0 4px 16px rgba(28, 28, 30, 0.06)',
   },
   placeholder: {
     flex: 1,
@@ -84,12 +86,14 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: radius.md,
-    backgroundColor: colors.backgroundElevated,
+    backgroundColor: colors.backgroundMuted,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
     borderCurve: 'continuous',
-    boxShadow: '0 6px 24px rgba(0, 0, 0, 0.12)',
+    borderWidth: 1,
+    borderColor: colors.border,
+    boxShadow: '0 4px 16px rgba(28, 28, 30, 0.06)',
   },
   vegToggleOn: {
     borderWidth: 1.5,

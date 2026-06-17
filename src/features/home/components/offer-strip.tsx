@@ -45,10 +45,10 @@ export function OfferStrip({ promos }: OfferStripProps) {
           <PremiumText variant="overline" color={colors.accent}>
             {item.brand}
           </PremiumText>
-          <PremiumText variant="h3" color={colors.textInverse}>
+          <PremiumText variant="h3" color={colors.textPrimary}>
             {item.title}
           </PremiumText>
-          <PremiumText variant="bodySmall" color={colors.textOnDarkMuted}>
+          <PremiumText variant="bodySmall" color={colors.textSecondary}>
             {item.subtitle}
           </PremiumText>
           {item.image ? (
@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     minHeight: 118,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: colors.border,
+    backgroundColor: colors.backgroundMuted,
     padding: spacing.lg,
     gap: spacing.xs,
     overflow: 'hidden',

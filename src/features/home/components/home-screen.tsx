@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -93,7 +92,7 @@ export function HomeScreen() {
 
   return (
     <View style={styles.root} collapsable={false}>
-      <AppStatusBar style="light" />
+      <AppStatusBar style="dark" />
       <ScrollView
         style={styles.screen}
         contentInsetAdjustmentBehavior="never"
@@ -103,20 +102,16 @@ export function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.textInverse}
+            tintColor={colors.textPrimary}
           />
         }
       >
-        <LinearGradient
-          colors={[colors.backgroundDark, '#1A1A22', colors.secondary]}
-          locations={[0, 0.55, 1]}
-          style={[styles.darkHeader, { paddingTop: insets.top + spacing.lg }]}
-        >
+        <View style={[styles.header, { paddingTop: insets.top + spacing.lg }]}>
           <HomeHeader />
           <ServiceGrid />
           <HomeSearchBar />
           <OfferStrip promos={promosQuery.data} />
-        </LinearGradient>
+        </View>
 
         <View style={styles.body}>
           <HeroBanner promo={promosQuery.data?.[0]} />
@@ -185,16 +180,17 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.backgroundDark,
+    backgroundColor: colors.background,
   },
   screen: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  darkHeader: {
+  header: {
     paddingBottom: spacing.xl,
     borderBottomLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
+    backgroundColor: colors.backgroundElevated,
   },
   body: {
     backgroundColor: colors.background,

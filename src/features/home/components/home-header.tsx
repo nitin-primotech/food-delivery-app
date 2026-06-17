@@ -25,22 +25,22 @@ export function HomeHeader() {
           <AppSymbol
             name="location.fill"
             size={22}
-            tintColor={colors.primaryLight}
+            tintColor={colors.primary}
           />
           <View style={styles.locationText}>
             <View style={styles.locationTitle}>
-              <PremiumText variant="h3" color={colors.textInverse}>
+              <PremiumText variant="h3" color={colors.textPrimary}>
                 {address.label}
               </PremiumText>
               <AppSymbol
                 name="chevron.down"
                 size={14}
-                tintColor={colors.textInverse}
+                tintColor={colors.textPrimary}
               />
             </View>
             <PremiumText
               variant="bodySmall"
-              color={colors.textOnDarkMuted}
+              color={colors.textSecondary}
               numberOfLines={1}
             >
               {address.line1}
@@ -59,10 +59,10 @@ export function HomeHeader() {
       </View>
       {phone ? (
         <View style={styles.sessionPill}>
-          <PremiumText variant="overline" color={colors.textOnDarkMuted}>
+          <PremiumText variant="overline" color={colors.textSecondary}>
             Signed in
           </PremiumText>
-          <PremiumText variant="captionMedium" color={colors.textInverse}>
+          <PremiumText variant="captionMedium" color={colors.textPrimary}>
             +91 {phone.slice(0, 3)} ••• {phone.slice(-4)}
           </PremiumText>
         </View>
@@ -111,11 +111,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: colors.backgroundMuted,
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
+    borderColor: colors.border,
   },
 });
