@@ -68,7 +68,7 @@ export function ProfileScreen() {
           </PremiumText>
           {phone ? (
             <PremiumText variant="caption" color={colors.textSecondary}>
-              +1 {phone.slice(0, 3)}•••{phone.slice(-4)}
+              +91 {phone.slice(0, 3)}•••{phone.slice(-4)}
             </PremiumText>
           ) : null}
           <View style={styles.stats}>

@@ -63,7 +63,7 @@ export function HomeHeader() {
             Signed in
           </PremiumText>
           <PremiumText variant="captionMedium" color={colors.textInverse}>
-            +1 {phone.slice(0, 3)} ••• {phone.slice(-4)}
+            +91 {phone.slice(0, 3)} ••• {phone.slice(-4)}
           </PremiumText>
         </View>
       ) : null}

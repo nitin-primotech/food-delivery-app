@@ -70,9 +70,9 @@ export const screens = {
 
 export const gradients = {
   primary: {
-    colors: [colors.gradientStart, colors.gradientEnd] as [string, string],
-    start: { x: 0, y: 0 },
-    end: { x: 1, y: 1 },
+    colors: [colors.gradientStart, colors.primaryDark] as [string, string],
+    start: { x: 0, y: 0.5 },
+    end: { x: 1, y: 0.5 },
   },
   gold: {
     colors: [colors.gradientGoldStart, colors.gradientGoldEnd] as [

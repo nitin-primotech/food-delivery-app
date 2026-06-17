@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   InteractionManager,
   Keyboard,
@@ -10,184 +10,231 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import type { OtpDigitStatus } from '@/features/auth/components/verification-code/animated-code-number';
+import { useAnimatedShake } from '@/features/auth/components/verification-code/use-animated-shake';
+import { VerificationCode } from '@/features/auth/components/verification-code/verification-code';
 import { verifyOtpAndCreateSession } from '@/features/auth/services/auth.service';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
-import { keyboardAvoidingBehavior } from '@/shared/utils/keyboard';
+import {
+  keyboardAppearance,
+  keyboardAvoidingBehavior,
+} from '@/shared/utils/keyboard';
 import { setAuthSession } from '@/store/auth.store';
 import { colors } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
-import { fonts, typography } from '@/theme/typography';
+import { spacing } from '@/theme/spacing';
 
 const OTP_LENGTH = 4;
+const CORRECT_OTP = 1234;
 
 export function OtpVerifyScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { phone } = useLocalSearchParams<{ phone: string }>();
-  const [digits, setDigits] = useState(['', '', '', '']);
-  const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const [showToast, setShowToast] = useState(true);
 
-  const code = digits.join('');
+  const verificationStatus = useSharedValue<OtpDigitStatus>('inProgress');
+  const invisibleInputRef = useRef<TextInput>(null);
+  const { shake, rShakeStyle } = useAnimatedShake();
+
   const masked = phone ? `+1 ${phone.slice(0, 3)}•••${phone.slice(-4)}` : '';
+  const codeString = code.join('');
 
-  function updateDigit(index: number, value: string) {
-    const digitsOnly = value.replace(/\D/g, '');
+  useEffect(() => {
+    const timer = setTimeout(() => setShowToast(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
-    if (digitsOnly.length > 1) {
-      const pasted = digitsOnly.slice(0, OTP_LENGTH).split('');
-      const next = [...digits];
-      for (let i = 0; i < pasted.length && index + i < OTP_LENGTH; i++) {
-        next[index + i] = pasted[i] ?? '';
-      }
-      setDigits(next);
-      setError(null);
-      const focusIndex = Math.min(index + pasted.length, OTP_LENGTH - 1);
-      inputs.current[focusIndex]?.focus();
-      return;
-    }
+  useFocusEffect(
+    useCallback(() => {
+      const focusTimer = setTimeout(
+        () => invisibleInputRef.current?.focus(),
+        300,
+      );
+      return () => {
+        clearTimeout(focusTimer);
+        invisibleInputRef.current?.blur();
+      };
+    }, []),
+  );
 
-    if (!digitsOnly && value === '') {
-      const next = [...digits];
-      if (digits[index]) {
-        next[index] = '';
-        setDigits(next);
-        setError(null);
-        return;
-      }
-      if (index > 0) {
-        next[index - 1] = '';
-        setDigits(next);
-        setError(null);
-        inputs.current[index - 1]?.focus();
-      }
-      return;
-    }
+  const resetCode = useCallback(() => {
+    setTimeout(() => {
+      verificationStatus.value = 'inProgress';
+      setCode([]);
+      invisibleInputRef.current?.clear();
+      invisibleInputRef.current?.focus();
+    }, 1000);
+  }, [verificationStatus]);
 
-    const d = digitsOnly.slice(-1);
-    const next = [...digits];
-    next[index] = d;
-    setDigits(next);
-    setError(null);
-    if (d && index < OTP_LENGTH - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-  }
+  const onWrongCode = useCallback(() => {
+    verificationStatus.value = 'wrong';
+    shake();
+    resetCode();
+  }, [resetCode, shake, verificationStatus]);
 
-  async function handleVerify() {
-    if (!phone || code.length < OTP_LENGTH || isLoading) return;
+  const onCorrectCode = useCallback(async () => {
+    if (!phone || isLoading) return;
+    verificationStatus.value = 'correct';
     setIsLoading(true);
-    setError(null);
+
     try {
-      const session = await verifyOtpAndCreateSession(phone, code);
+      const session = await verifyOtpAndCreateSession(
+        phone,
+        CORRECT_OTP.toString(),
+      );
       await setAuthSession(session);
       Keyboard.dismiss();
-      for (const input of inputs.current) {
-        input?.blur();
-      }
       InteractionManager.runAfterInteractions(() => {
         router.replace('/(auth)/name');
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed');
+    } catch {
+      verificationStatus.value = 'wrong';
+      shake();
+      resetCode();
       setIsLoading(false);
+    }
+  }, [phone, isLoading, resetCode, router, shake, verificationStatus]);
+
+  function handleTextChange(text: string) {
+    if (isLoading) return;
+
+    const digits = text.replace(/\D/g, '').slice(0, OTP_LENGTH);
+    const newCode = digits.split('').map((d) => Number(d));
+    setCode(newCode);
+    verificationStatus.value = 'inProgress';
+  }
+
+  function handleVerifyPress() {
+    if (codeString === CORRECT_OTP.toString()) {
+      void onCorrectCode();
+      return;
+    }
+    if (codeString.length === OTP_LENGTH) {
+      onWrongCode();
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={keyboardAvoidingBehavior}
-      keyboardVerticalOffset={insets.top}
-    >
-      <ScrollView
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <KeyboardAvoidingView
         style={styles.flex}
-        contentContainerStyle={[
-          styles.root,
-          { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        behavior={keyboardAvoidingBehavior}
+        keyboardVerticalOffset={0}
       >
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.back}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={StyleSheet.flatten([
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + spacing.lg },
+          ])}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
         >
-          <AppSymbol
-            name="chevron.left"
-            size={22}
-            tintColor={colors.textPrimary}
-          />
-        </Pressable>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.back}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <AppSymbol
+              name="chevron.left"
+              size={22}
+              tintColor={colors.textPrimary}
+            />
+          </Pressable>
 
-        <View style={styles.content}>
-          <PremiumText variant="h1">Verify OTP</PremiumText>
-          <PremiumText variant="body" color={colors.textSecondary}>
-            Code sent to {masked}. Demo code:{' '}
-            <PremiumText variant="bodyMedium" color={colors.primary}>
-              1234
+          <View style={styles.content}>
+            <PremiumText variant="h1">Verify OTP</PremiumText>
+            <PremiumText variant="body" color={colors.textSecondary}>
+              Code sent to {masked}
             </PremiumText>
-          </PremiumText>
 
-          <View style={styles.otpRow}>
-            {digits.map((d, i) => (
-              <TextInput
-                key={i}
-                ref={(el) => {
-                  inputs.current[i] = el;
-                }}
-                value={d}
-                onChangeText={(v) => updateDigit(i, v)}
-                keyboardType="number-pad"
+            <Animated.View
+              style={[styles.codeWrap, rShakeStyle]}
+              onTouchEnd={() => invisibleInputRef.current?.focus()}
+            >
+              <VerificationCode
+                code={code}
                 maxLength={OTP_LENGTH}
-                textContentType="oneTimeCode"
-                autoComplete="one-time-code"
-                style={[styles.otpBox, d ? styles.otpBoxFilled : null]}
-                selectTextOnFocus
-                accessibilityLabel={`Digit ${i + 1} of ${OTP_LENGTH}`}
+                status={verificationStatus}
               />
-            ))}
+            </Animated.View>
+
+            <PremiumText variant="caption" color={colors.textTertiary}>
+              Tap the boxes to enter your code
+            </PremiumText>
           </View>
 
-          {error ? (
-            <PremiumText variant="caption" color={colors.danger} selectable>
-              {error}
+          <View style={styles.footer}>
+            <PremiumText
+              variant="caption"
+              color={colors.textTertiary}
+              style={styles.hint}
+            >
+              Session stays active for 10 minutes after login.
             </PremiumText>
-          ) : null}
+            <PremiumButton
+              label={isLoading ? 'Verifying…' : 'Verify & continue'}
+              onPress={handleVerifyPress}
+              disabled={codeString.length < OTP_LENGTH || isLoading}
+            />
+          </View>
+        </ScrollView>
 
-          <PremiumButton
-            label={isLoading ? 'Verifying…' : 'Verify & continue'}
-            onPress={handleVerify}
-            disabled={code.length < OTP_LENGTH || isLoading}
-          />
+        <TextInput
+          ref={invisibleInputRef}
+          value={codeString}
+          onChangeText={handleTextChange}
+          keyboardType="number-pad"
+          keyboardAppearance={keyboardAppearance}
+          maxLength={OTP_LENGTH}
+          textContentType="oneTimeCode"
+          autoComplete="one-time-code"
+          caretHidden
+          style={styles.invisibleInput}
+          accessibilityLabel="OTP input"
+          blurOnSubmit
+        />
 
-          <PremiumText
-            variant="caption"
-            color={colors.textTertiary}
-            style={styles.hint}
+        {showToast ? (
+          <View
+            style={StyleSheet.flatten([
+              styles.toast,
+              { bottom: insets.bottom + spacing.xxxl },
+            ])}
           >
-            Session stays active for 10 minutes after login.
-          </PremiumText>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <AppSymbol
+              name="info.circle.fill"
+              size={18}
+              tintColor={colors.textInverse}
+            />
+            <PremiumText variant="captionMedium" color={colors.textInverse}>
+              Your OTP is {CORRECT_OTP}
+            </PremiumText>
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.backgroundElevated,
+  },
   flex: {
     flex: 1,
   },
-  root: {
+  scrollContent: {
     flexGrow: 1,
-    backgroundColor: colors.backgroundElevated,
     paddingHorizontal: spacing.lg,
   },
   back: {
@@ -196,29 +243,33 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing.lg,
   },
-  otpRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'center',
+  codeWrap: {
     marginVertical: spacing.md,
+    width: '100%',
   },
-  otpBox: {
-    width: 56,
-    height: 64,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    textAlign: 'center',
-    ...typography.h2,
-    fontFamily: fonts.bold,
-    color: colors.textPrimary,
-    backgroundColor: colors.backgroundMuted,
-  },
-  otpBoxFilled: {
-    borderColor: colors.primary,
-    backgroundColor: colors.backgroundElevated,
+  footer: {
+    marginTop: 'auto',
+    gap: spacing.md,
+    paddingTop: spacing.xxl,
   },
   hint: {
     textAlign: 'center',
+  },
+  invisibleInput: {
+    position: 'absolute',
+    opacity: 0,
+    width: 1,
+    height: 1,
+  },
+  toast: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.textPrimary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 999,
   },
 });

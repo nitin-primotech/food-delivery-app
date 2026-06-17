@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppStatusBar } from '@/shared/components/app-status-bar';
+import { colors } from '@/theme/colors';
 
 type RootProviderProps = {
   children: ReactNode;
@@ -14,9 +15,11 @@ export function RootProvider({ children }: RootProviderProps) {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
-    if (process.env.EXPO_OS === 'android') {
-      void SystemUI.setBackgroundColorAsync('transparent');
-    }
+    void SystemUI.setBackgroundColorAsync(
+      process.env.EXPO_OS === 'android'
+        ? 'transparent'
+        : colors.backgroundElevated,
+    );
   }, []);
 
   return (

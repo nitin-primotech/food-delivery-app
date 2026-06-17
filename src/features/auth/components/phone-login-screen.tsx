@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -17,14 +17,18 @@ import { requestOtp } from '@/features/auth/services/auth.service';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
-import { keyboardAvoidingBehavior } from '@/shared/utils/keyboard';
+import {
+  keyboardAppearance,
+  keyboardAvoidingBehavior,
+} from '@/shared/utils/keyboard';
 import { colors, gradients } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
-import { fonts, typography } from '@/theme/typography';
+import { fonts } from '@/theme/typography';
 
 export function PhoneLoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const inputRef = useRef<TextInput>(null);
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,132 +53,136 @@ export function PhoneLoginScreen() {
   function clearPhone() {
     setPhone('');
     setError(null);
+    inputRef.current?.focus();
   }
 
   const digits = phone.replace(/\D/g, '');
   const canContinue = digits.length >= 10 && !isLoading;
 
-  function submitPhone() {
-    if (canContinue) {
-      void handleContinue();
-      return;
-    }
-    Keyboard.dismiss();
-  }
-
   return (
-    <View style={styles.root}>
-      <LinearGradient
-        colors={gradients.primary.colors}
-        style={StyleSheet.flatten([
-          styles.hero,
-          { paddingTop: insets.top + spacing.lg },
-        ])}
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={keyboardAvoidingBehavior}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.back}
-          hitSlop={12}
-        >
-          <AppSymbol
-            name="chevron.left"
-            size={22}
-            tintColor={colors.textInverse}
-          />
-        </Pressable>
-        <View style={styles.heroLogo}>
-          <View style={styles.logoMark}>
-            <PremiumText variant="h3" color={colors.primary}>
-              FR
-            </PremiumText>
-          </View>
-        </View>
-        <PremiumText
-          variant="bodyMedium"
-          color={colors.textInverse}
-          style={styles.heroText}
-        >
-          One app for food, grocery, dining & more in minutes!
-        </PremiumText>
-        <View style={styles.heroImages}>
-          <Image
-            source="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80"
-            style={styles.heroThumb}
-            contentFit="cover"
-          />
-          <Image
-            source="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"
-            style={StyleSheet.flatten([
-              styles.heroThumb,
-              styles.heroThumbCenter,
-            ])}
-            contentFit="cover"
-          />
-          <Image
-            source="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"
-            style={styles.heroThumb}
-            contentFit="cover"
-          />
-        </View>
-      </LinearGradient>
-
-      <KeyboardAvoidingView
-        behavior={keyboardAvoidingBehavior}
-        style={styles.sheetContainer}
-        keyboardVerticalOffset={0}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={StyleSheet.flatten([
-            styles.sheet,
-            { paddingBottom: insets.bottom + spacing.lg },
+        <LinearGradient
+          colors={gradients.primary.colors}
+          start={gradients.primary.start}
+          end={gradients.primary.end}
+          style={StyleSheet.flatten([
+            styles.hero,
+            { paddingTop: insets.top + spacing.lg },
           ])}
         >
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.back}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <AppSymbol
+              name="chevron.left"
+              size={22}
+              tintColor={colors.textInverse}
+            />
+          </Pressable>
+          <View style={styles.heroLogo}>
+            <View style={styles.logoMark}>
+              <Image
+                source={require('@/assets/images/foodrushlogo.png')}
+                style={styles.logoImage}
+                contentFit="contain"
+              />
+            </View>
+          </View>
+          <PremiumText
+            variant="bodyMedium"
+            color={colors.textInverse}
+            style={styles.heroText}
+          >
+            One app for food, grocery, dining & more in minutes!
+          </PremiumText>
+          <View style={styles.heroImages}>
+            <Image
+              source="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80"
+              style={styles.heroThumb}
+              contentFit="cover"
+            />
+            <Image
+              source="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"
+              style={StyleSheet.flatten([
+                styles.heroThumb,
+                styles.heroThumbCenter,
+              ])}
+              contentFit="cover"
+            />
+            <Image
+              source="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"
+              style={styles.heroThumb}
+              contentFit="cover"
+            />
+          </View>
+        </LinearGradient>
+
+        <View style={styles.sheet}>
           <PremiumText variant="h2" style={styles.title}>
             Enter your number
           </PremiumText>
 
           <View style={styles.inputWrap}>
-            <PremiumText
-              variant="label"
-              color={colors.primary}
-              style={styles.floatingLabel}
-            >
-              Mobile Number
-            </PremiumText>
+            <View style={styles.floatingLabel}>
+              <PremiumText variant="label" color={colors.primary}>
+                Mobile Number
+              </PremiumText>
+            </View>
             <View style={styles.inputRow}>
               <View style={styles.country}>
-                <PremiumText variant="bodyMedium">🇺🇸 +1</PremiumText>
+                <PremiumText variant="bodyMedium">🇮🇳</PremiumText>
+                <PremiumText variant="bodyMedium" style={styles.countryCode}>
+                  +91
+                </PremiumText>
                 <AppSymbol
                   name="chevron.down"
-                  size={14}
-                  tintColor={colors.textPrimary}
+                  size={12}
+                  tintColor={colors.textSecondary}
                 />
               </View>
               <View style={styles.inputDivider} />
               <TextInput
+                ref={inputRef}
                 value={phone}
                 onChangeText={(t) => {
                   setPhone(t.replace(/\D/g, '').slice(0, 10));
                   setError(null);
                 }}
                 keyboardType="number-pad"
+                keyboardAppearance={keyboardAppearance}
                 textContentType="telephoneNumber"
                 autoComplete="tel"
-                placeholder="6502137390"
+                placeholder="10-digit mobile"
                 placeholderTextColor={colors.textTertiary}
                 style={styles.input}
                 maxLength={10}
-                returnKeyType="done"
-                submitBehavior="submit"
-                onSubmitEditing={submitPhone}
+                selectionColor={colors.textPrimary}
+                blurOnSubmit
               />
               {phone.length > 0 ? (
-                <Pressable onPress={clearPhone} hitSlop={8}>
+                <Pressable
+                  onPress={clearPhone}
+                  hitSlop={8}
+                  style={styles.clearBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear phone number"
+                >
                   <AppSymbol
                     name="xmark.circle.fill"
-                    size={22}
+                    size={20}
                     tintColor={colors.textTertiary}
                   />
                 </Pressable>
@@ -188,6 +196,8 @@ export function PhoneLoginScreen() {
             </PremiumText>
           ) : null}
 
+          <View style={styles.spacer} />
+
           <PremiumButton
             label={isLoading ? 'Sending code…' : 'Continue'}
             onPress={handleContinue}
@@ -200,18 +210,26 @@ export function PhoneLoginScreen() {
             style={styles.legal}
           >
             By continuing, I accept the{' '}
-            <PremiumText variant="captionMedium" color={colors.primary}>
+            <PremiumText
+              variant="captionMedium"
+              color={colors.primary}
+              onPress={() => router.push('/(auth)/terms')}
+            >
               terms of service
             </PremiumText>{' '}
             &{' '}
-            <PremiumText variant="captionMedium" color={colors.primary}>
+            <PremiumText
+              variant="captionMedium"
+              color={colors.primary}
+              onPress={() => router.push('/(auth)/privacy')}
+            >
               privacy policy
             </PremiumText>
             .
           </PremiumText>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -219,6 +237,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.backgroundElevated,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   hero: {
     paddingHorizontal: spacing.lg,
@@ -234,16 +255,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   logoMark: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.textInverse,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logoImage: {
+    width: 72,
+    height: 72,
   },
   heroText: {
     textAlign: 'center',
     marginBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
   },
   heroImages: {
     flexDirection: 'row',
@@ -262,17 +284,15 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
   },
-  sheetContainer: {
-    flex: 1,
-    marginTop: -spacing.xxl,
-  },
   sheet: {
     flexGrow: 1,
     backgroundColor: colors.backgroundElevated,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
+    marginTop: -spacing.xxl,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,
+    paddingBottom: spacing.xl,
     gap: spacing.lg,
     borderCurve: 'continuous',
   },
@@ -283,42 +303,57 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.primary,
     borderRadius: radius.md,
-    paddingTop: spacing.md,
+    borderCurve: 'continuous',
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    minHeight: 64,
+    justifyContent: 'center',
   },
   floatingLabel: {
     position: 'absolute',
-    top: -10,
+    top: -11,
     left: spacing.md,
     backgroundColor: colors.backgroundElevated,
-    paddingHorizontal: spacing.xxs,
+    paddingHorizontal: spacing.xs,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    minHeight: 32,
   },
   country: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
+    paddingRight: spacing.sm,
+  },
+  countryCode: {
+    fontFamily: fonts.semibold,
   },
   inputDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: colors.border,
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
+    marginRight: spacing.md,
+    backgroundColor: colors.borderStrong,
   },
   input: {
     flex: 1,
-    ...typography.h3,
     fontFamily: fonts.medium,
+    fontSize: 18,
+    lineHeight: 24,
     color: colors.textPrimary,
-    paddingVertical: spacing.xs,
+    paddingVertical: 0,
+    letterSpacing: 0.5,
+  },
+  clearBtn: {
+    marginLeft: spacing.xs,
+  },
+  spacer: {
+    flex: 1,
   },
   legal: {
     textAlign: 'center',
     lineHeight: 20,
-    marginTop: spacing.sm,
   },
 });

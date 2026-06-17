@@ -18,5 +18,11 @@ export function getLocationSuggestions(query: string): LocationSuggestion[] {
 }
 
 export function getCurrentLocationSuggestion(): LocationSuggestion {
-  return ALL_LOCATIONS[0];
+  return {
+    id: 'current-location',
+    title: 'Sector 71',
+    subtitle: 'SAS Nagar, Mohali, Punjab, India',
+    line1: 'Sector 71',
+    line2: 'SAS Nagar, Mohali, Punjab, India',
+  };
 }

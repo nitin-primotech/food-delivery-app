@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -28,9 +29,11 @@ export function AppSplash({ ready = false }: AppSplashProps) {
     >
       <Animated.View entering={FadeIn.duration(600)} style={styles.center}>
         <View style={styles.logoMark}>
-          <PremiumText variant="display" color={colors.primary}>
-            FR
-          </PremiumText>
+          <Image
+            source={require('@/assets/images/foodrushlogo.png')}
+            style={styles.logoImage}
+            contentFit="contain"
+          />
         </View>
         <PremiumText variant="h1" color={colors.textInverse}>
           foodRush
@@ -58,15 +61,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   logoMark: {
-    width: 88,
-    height: 88,
-    borderRadius: radius.xl,
-    backgroundColor: colors.textInverse,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-    boxShadow: '0 12px 40px rgba(0,0,0,0.25)',
-    borderCurve: 'continuous',
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
   },
   tagline: {
     marginTop: spacing.xs,

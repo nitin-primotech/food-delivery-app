@@ -44,11 +44,26 @@ export function NameEntryScreen() {
           { paddingTop: insets.top + spacing.lg },
         ])}
       >
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.back}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <AppSymbol
+            name="chevron.left"
+            size={22}
+            tintColor={colors.textInverse}
+          />
+        </Pressable>
         <View style={styles.heroLogo}>
           <View style={styles.logoMark}>
-            <PremiumText variant="h3" color={colors.primary}>
-              FR
-            </PremiumText>
+            <Image
+              source={require('@/assets/images/foodrushlogo.png')}
+              style={styles.logoImage}
+              contentFit="contain"
+            />
           </View>
         </View>
         <PremiumText
@@ -117,8 +132,7 @@ export function NameEntryScreen() {
                 textContentType="name"
                 autoComplete="name"
                 returnKeyType="done"
-                submitBehavior="submit"
-                onSubmitEditing={handleContinue}
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
               {name.length > 0 ? (
                 <Pressable onPress={() => setName('')} hitSlop={8}>
@@ -152,17 +166,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxxl,
   },
+  back: {
+    marginBottom: spacing.md,
+  },
   heroLogo: {
     alignItems: 'center',
     marginBottom: spacing.md,
   },
   logoMark: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.textInverse,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logoImage: {
+    width: 72,
+    height: 72,
   },
   heroText: {
     textAlign: 'center',

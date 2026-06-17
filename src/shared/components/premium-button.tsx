@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, type PressableProps, StyleSheet } from 'react-native';
+import { Pressable, type PressableProps, StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -83,26 +83,44 @@ export function PremiumButton({
         style={[styles.shell, animatedStyle, style]}
         {...rest}
       >
-        <LinearGradient
-          colors={gradients.primary.colors}
-          start={gradients.primary.start}
-          end={gradients.primary.end}
-          style={[
-            styles.base,
-            styles.primaryFill,
-            shadows.float,
-            {
-              paddingVertical,
-              paddingHorizontal,
-              borderCurve: 'continuous',
-            },
-            disabled && styles.disabled,
-          ]}
-        >
-          <PremiumText variant="bodyMedium" color={colors.textInverse}>
-            {label}
-          </PremiumText>
-        </LinearGradient>
+        {disabled ? (
+          <View
+            style={[
+              styles.base,
+              styles.primaryFill,
+              styles.primaryDisabled,
+              {
+                paddingVertical,
+                paddingHorizontal,
+                borderCurve: 'continuous',
+              },
+            ]}
+          >
+            <PremiumText variant="bodyMedium" color={colors.textTertiary}>
+              {label}
+            </PremiumText>
+          </View>
+        ) : (
+          <LinearGradient
+            colors={gradients.primary.colors}
+            start={gradients.primary.start}
+            end={gradients.primary.end}
+            style={[
+              styles.base,
+              styles.primaryFill,
+              shadows.float,
+              {
+                paddingVertical,
+                paddingHorizontal,
+                borderCurve: 'continuous',
+              },
+            ]}
+          >
+            <PremiumText variant="bodyMedium" color={colors.textInverse}>
+              {label}
+            </PremiumText>
+          </LinearGradient>
+        )}
       </AnimatedPressable>
     );
   }
@@ -155,6 +173,9 @@ const styles = StyleSheet.create({
   },
   primaryFill: {
     width: '100%',
+  },
+  primaryDisabled: {
+    backgroundColor: colors.backgroundMuted,
   },
   secondary: {
     backgroundColor: colors.backgroundElevated,

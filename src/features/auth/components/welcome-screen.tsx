@@ -36,9 +36,11 @@ export function WelcomeScreen() {
       <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
         <View style={styles.logoRow}>
           <View style={styles.logoMark}>
-            <PremiumText variant="h3" color={colors.primary}>
-              FR
-            </PremiumText>
+            <Image
+              source={require('@/assets/images/foodrushlogo.png')}
+              style={styles.logoImage}
+              contentFit="contain"
+            />
           </View>
           <PremiumText variant="h2" color={colors.textInverse}>
             foodRush
@@ -130,12 +132,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   logoMark: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.textInverse,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logoImage: {
+    width: 52,
+    height: 52,
   },
   skipBtn: {
     paddingHorizontal: spacing.md,

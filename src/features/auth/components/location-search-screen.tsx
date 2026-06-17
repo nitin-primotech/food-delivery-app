@@ -26,6 +26,7 @@ export function LocationSearchScreen({
   const insets = useSafeAreaInsets();
   const isOnboarding = flow === 'onboarding';
   const [query, setQuery] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   const results = useMemo(() => getLocationSuggestions(query), [query]);
 
@@ -40,7 +41,19 @@ export function LocationSearchScreen({
   }
 
   function useCurrentLocation() {
-    finishWithSuggestion(getCurrentLocationSuggestion());
+    const suggestion = getCurrentLocationSuggestion();
+    setSelectedLocation(`${suggestion.title}, ${suggestion.subtitle}`);
+    setTimeout(() => {
+      finishWithSuggestion(suggestion);
+    }, 1500);
+  }
+
+  function handleBack() {
+    if (isOnboarding) {
+      router.replace('/(auth)/name' as Href);
+    } else {
+      router.back();
+    }
   }
 
   return (
@@ -48,19 +61,13 @@ export function LocationSearchScreen({
       <AppStatusBar style="dark" />
       <View style={[styles.content, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
-          {!isOnboarding ? (
-            <Pressable
-              onPress={() => router.back()}
-              hitSlop={12}
-              style={styles.back}
-            >
-              <AppSymbol
-                name="chevron.left"
-                size={22}
-                tintColor={colors.textPrimary}
-              />
-            </Pressable>
-          ) : null}
+          <Pressable onPress={handleBack} hitSlop={12} style={styles.back}>
+            <AppSymbol
+              name="chevron.left"
+              size={22}
+              tintColor={colors.textPrimary}
+            />
+          </Pressable>
           <PremiumText variant="h2" style={styles.title}>
             {isOnboarding
               ? 'Enter your area or apartment name'
@@ -100,26 +107,45 @@ export function LocationSearchScreen({
           ) : null}
         </View>
 
-        <Pressable style={styles.actionRow} onPress={useCurrentLocation}>
+        <Pressable
+          style={styles.actionRow}
+          onPress={useCurrentLocation}
+          disabled={selectedLocation !== null}
+        >
           <View style={styles.actionIcon}>
             <AppSymbol
               name="location.fill"
               size={20}
-              tintColor={colors.primary}
+              tintColor={
+                selectedLocation ? colors.textSecondary : colors.primary
+              }
             />
           </View>
-          <PremiumText
-            variant="bodyMedium"
-            color={colors.primary}
-            style={styles.actionLabel}
-          >
-            Use my current location
-          </PremiumText>
-          <AppSymbol
-            name="chevron.right"
-            size={16}
-            tintColor={colors.primary}
-          />
+          {selectedLocation ? (
+            <View style={styles.actionText}>
+              <PremiumText variant="bodyMedium" color={colors.textPrimary}>
+                {selectedLocation}
+              </PremiumText>
+              <PremiumText variant="caption" color={colors.textSecondary}>
+                Setting location…
+              </PremiumText>
+            </View>
+          ) : (
+            <PremiumText
+              variant="bodyMedium"
+              color={colors.primary}
+              style={styles.actionLabel}
+            >
+              Use my current location
+            </PremiumText>
+          )}
+          {!selectedLocation ? (
+            <AppSymbol
+              name="chevron.right"
+              size={16}
+              tintColor={colors.primary}
+            />
+          ) : null}
         </Pressable>
 
         <View style={styles.divider} />
@@ -225,6 +251,10 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     flex: 1,
+  },
+  actionText: {
+    flex: 1,
+    gap: spacing.xxs,
   },
   divider: {
     height: 1,

@@ -104,6 +104,7 @@ export function PersonalizationScreen() {
                   style={styles.cuisineImage}
                   contentFit="cover"
                 />
+                <View style={styles.cuisineOverlay} />
                 {active ? (
                   <View style={styles.check}>
                     <AppSymbol
@@ -115,7 +116,7 @@ export function PersonalizationScreen() {
                 ) : null}
                 <PremiumText
                   variant="captionMedium"
-                  color={active ? colors.textInverse : colors.textPrimary}
+                  color={colors.textInverse}
                   style={styles.cuisineLabel}
                 >
                   {cuisine.label}
@@ -216,11 +217,18 @@ const styles = StyleSheet.create({
   cuisineImage: {
     ...StyleSheet.absoluteFill,
   },
+  cuisineOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
   cuisineLabel: {
     position: 'absolute',
     bottom: spacing.sm,
     left: spacing.sm,
     right: spacing.sm,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   check: {
     position: 'absolute',
@@ -250,8 +258,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   dietaryActive: {
-    backgroundColor: colors.secondary,
-    borderColor: colors.secondary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   cta: {
     marginTop: spacing.lg,

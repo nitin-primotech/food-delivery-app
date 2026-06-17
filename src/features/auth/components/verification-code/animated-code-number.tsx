@@ -1,0 +1,86 @@
+import { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
+import type { SharedValue } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeOut,
+  FlipInXDown,
+  FlipOutXDown,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/spacing';
+import { fonts, typography } from '@/theme/typography';
+
+export type OtpDigitStatus = 'inProgress' | 'correct' | 'wrong';
+
+export type AnimatedCodeNumberProps = {
+  code?: number;
+  highlighted: boolean;
+  status: SharedValue<OtpDigitStatus>;
+};
+
+export function AnimatedCodeNumber({
+  code,
+  highlighted,
+  status,
+}: AnimatedCodeNumberProps) {
+  const getColorByStatus = useCallback(
+    (vStatus: OtpDigitStatus) => {
+      'worklet';
+      if (highlighted) return '#D4543C';
+      if (vStatus === 'correct') return '#2D6A4F';
+      if (vStatus === 'wrong') return '#DC2626';
+      return '#E8E4DE';
+    },
+    [highlighted],
+  );
+
+  const rBoxStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(getColorByStatus(status.value)),
+    backgroundColor: withTiming(highlighted ? '#FFFFFF' : '#F0EBE4'),
+  }));
+
+  return (
+    <Animated.View style={[styles.container, rBoxStyle]}>
+      {code != null ? (
+        <Animated.View
+          entering={FadeIn.duration(250)}
+          exiting={FadeOut.duration(250)}
+        >
+          <Animated.Text
+            entering={FlipInXDown.duration(500)
+              .easing(Easing.bezier(0, 0.75, 0.5, 0.9))
+              .build()}
+            exiting={FlipOutXDown.duration(500)
+              .easing(Easing.bezier(0.6, 0.1, 0.4, 0.8))
+              .build()}
+            style={styles.text}
+          >
+            {code}
+          </Animated.Text>
+        </Animated.View>
+      ) : null}
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderCurve: 'continuous',
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    height: 64,
+    width: 56,
+  },
+  text: {
+    ...typography.h2,
+    fontFamily: fonts.bold,
+    color: colors.textPrimary,
+  },
+});
