@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -64,6 +64,7 @@ const FALLBACK_OFFERS: Promo[] = [
 ];
 
 const SLIDE_HEIGHT = 176;
+const AUTO_ADVANCE_MS = 4000;
 
 type OfferCarouselProps = {
   promos?: Promo[];
@@ -72,24 +73,78 @@ type OfferCarouselProps = {
 export function OfferCarousel({ promos }: OfferCarouselProps) {
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+  const activeIndexRef = useRef(0);
+  const isUserDraggingRef = useRef(false);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
 
   const items = (promos?.length ? promos : FALLBACK_OFFERS).slice(0, 5);
   const cardWidth = width - spacing.lg * 2;
 
+  const clearAutoAdvance = useCallback(() => {
+    if (autoAdvanceTimerRef.current) {
+      clearInterval(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  }, []);
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const clamped = Math.min(Math.max(index, 0), items.length - 1);
+      activeIndexRef.current = clamped;
+      setActiveIndex(clamped);
+      scrollRef.current?.scrollTo({ x: clamped * width, animated: true });
+    },
+    [items.length, width],
+  );
+
+  const startAutoAdvance = useCallback(() => {
+    clearAutoAdvance();
+    autoAdvanceTimerRef.current = setInterval(() => {
+      if (isUserDraggingRef.current || items.length <= 1) {
+        return;
+      }
+      const next = (activeIndexRef.current + 1) % items.length;
+      scrollToIndex(next);
+    }, AUTO_ADVANCE_MS);
+  }, [clearAutoAdvance, items.length, scrollToIndex]);
+
+  useEffect(() => {
+    startAutoAdvance();
+    return clearAutoAdvance;
+  }, [clearAutoAdvance, startAutoAdvance]);
+
+  function syncIndexFromOffset(offsetX: number) {
+    const index = Math.round(offsetX / width);
+    const clamped = Math.min(Math.max(index, 0), items.length - 1);
+    activeIndexRef.current = clamped;
+    setActiveIndex(clamped);
+  }
+
+  function onScrollBeginDrag() {
+    isUserDraggingRef.current = true;
+    clearAutoAdvance();
+  }
+
   function onScrollEnd(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const index = Math.round(e.nativeEvent.contentOffset.x / width);
-    setActiveIndex(Math.min(Math.max(index, 0), items.length - 1));
+    syncIndexFromOffset(e.nativeEvent.contentOffset.x);
+    isUserDraggingRef.current = false;
+    startAutoAdvance();
   }
 
   return (
     <View style={styles.wrap}>
       <ScrollView
+        ref={scrollRef}
         horizontal
         pagingEnabled
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         decelerationRate="fast"
+        onScrollBeginDrag={onScrollBeginDrag}
         onMomentumScrollEnd={onScrollEnd}
         onScrollEndDrag={onScrollEnd}
         style={styles.scroller}
@@ -137,10 +192,11 @@ export function OfferCarousel({ promos }: OfferCarouselProps) {
 
       <View style={styles.dots}>
         {items.map((item, index) => (
-          <View
-            key={item.id}
-            style={[styles.dot, index === activeIndex && styles.dotActive]}
-          />
+          <View key={item.id} style={styles.dotTrack}>
+            <View
+              style={[styles.dot, index === activeIndex && styles.dotActive]}
+            />
+          </View>
         ))}
       </View>
     </View>
@@ -173,11 +229,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  gradient: {},
   content: {
-    ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
     padding: spacing.lg,
     gap: spacing.xxs,
@@ -196,6 +249,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     paddingTop: spacing.sm,
+  },
+  dotTrack: {
+    width: 18,
+    height: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dot: {
     width: 6,
