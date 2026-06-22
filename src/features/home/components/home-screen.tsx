@@ -10,10 +10,13 @@ import {
 import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { FilterPills } from '@/features/home/components/filter-pills';
 import { FoodCategoryStrip } from '@/features/home/components/food-category-strip';
+import { HomeBestOffers } from '@/features/home/components/home-best-offers';
 import { HomeHeader } from '@/features/home/components/home-header';
+import { HomePopularBrands } from '@/features/home/components/home-popular-brands';
+import { HomeRestaurantCarousel } from '@/features/home/components/home-restaurant-carousel';
+import { HomeSearchBar } from '@/features/home/components/home-search-bar';
 import { OfferCarousel } from '@/features/home/components/offer-carousel';
 import { RecommendedSection } from '@/features/home/components/recommended-section';
-import { RestaurantTileCard } from '@/features/home/components/restaurant-tile-card';
 import { getRecommendedDishes } from '@/features/home/utils/get-recommended-dishes';
 import {
   getPersonalizedRestaurants,
@@ -21,13 +24,10 @@ import {
 } from '@/features/home/utils/personalize-restaurants';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { ErrorState } from '@/shared/components/error-state';
-import { PremiumText } from '@/shared/components/premium-text';
 import { Shimmer } from '@/shared/components/shimmer';
-import { useCarouselItemWidth } from '@/shared/hooks/use-carousel-item-width';
 import { useSimulatedQuery } from '@/shared/hooks/use-simulated-query';
 import { selectPreferences, useAppStore } from '@/store/app.store';
 import { colors } from '@/theme/colors';
-import { screenTopPadding } from '@/theme/screen-edge';
 import { spacing } from '@/theme/spacing';
 import { tabBarContentPadding } from '@/theme/tab-bar';
 
@@ -44,14 +44,11 @@ function filterRestaurants(
   return list;
 }
 
-function HomeSkeleton({ cardWidth }: { cardWidth: number }) {
+function HomeSkeleton() {
   return (
     <View style={styles.skeleton}>
-      <Shimmer height={168} borderRadius={24} />
-      <View style={styles.skeletonRow}>
-        <Shimmer height={220} width={cardWidth} borderRadius={24} />
-        <Shimmer height={220} width={cardWidth} borderRadius={24} />
-      </View>
+      <Shimmer height={168} borderRadius={14} />
+      <Shimmer height={196} borderRadius={14} />
     </View>
   );
 }
@@ -60,13 +57,6 @@ export function HomeScreen() {
   const insets = useSafeAreaInsets();
   const preferences = useAppStore(selectPreferences);
   const [filterId, setFilterId] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const cardWidth = useCarouselItemWidth({
-    visibleCount: 2,
-    peek: 0.14,
-    gap: spacing.md,
-    paddingEnd: spacing.lg,
-  });
 
   const promosQuery = useSimulatedQuery((signal) => fetchPromos(signal), []);
   const categoriesQuery = useSimulatedQuery(
@@ -99,19 +89,21 @@ export function HomeScreen() {
     restaurantsQuery.isRefreshing;
 
   const restaurants = filterRestaurants(restaurantsQuery.data ?? [], filterId);
-  const filteredRestaurants = categoryId
-    ? restaurants.filter((r) => r.categoryIds.includes(categoryId))
-    : restaurants;
-  const personalized = getPersonalizedRestaurants(
-    filteredRestaurants,
-    preferences,
-  );
-  const personalizedTitle = getPersonalizedSectionTitle(preferences);
+  const personalized = getPersonalizedRestaurants(restaurants, preferences);
+  const personalizedTitle =
+    filterId === 'fast'
+      ? 'Lightning delivery'
+      : filterId === 'off'
+        ? 'Top offers near you'
+        : getPersonalizedSectionTitle(preferences);
+
   const exploreRestaurants = [...personalized].reverse();
   const recommendedDishes = getRecommendedDishes(
     restaurantsQuery.data ?? [],
-    8,
+    12,
   );
+  const topPicksDishes = recommendedDishes.slice(0, 6);
+  const morePicksDishes = recommendedDishes.slice(6, 12);
 
   const bottomPad = tabBarContentPadding(insets.bottom);
 
@@ -131,28 +123,32 @@ export function HomeScreen() {
           />
         }
       >
-        <View
-          style={[styles.header, { paddingTop: screenTopPadding(spacing.xs) }]}
-        >
+        <View style={styles.header}>
           <HomeHeader />
+          <HomeSearchBar />
           <OfferCarousel promos={promosQuery.data} />
         </View>
 
         <View style={styles.body}>
           {categoriesQuery.data ? (
-            <FoodCategoryStrip
-              categories={categoriesQuery.data}
-              selectedId={categoryId}
-              onSelect={setCategoryId}
-            />
+            <FoodCategoryStrip categories={categoriesQuery.data} />
           ) : null}
+          {!isLoading && !hasError ? <HomeBestOffers /> : null}
           {!isLoading && !hasError ? (
-            <RecommendedSection dishes={recommendedDishes} />
+            <RecommendedSection dishes={topPicksDishes} />
           ) : null}
+          {!isLoading && !hasError ? <HomePopularBrands /> : null}
+
           <FilterPills activeId={filterId} onSelect={setFilterId} />
 
-          {isLoading ? <HomeSkeleton cardWidth={cardWidth} /> : null}
-
+          {isLoading ? <HomeSkeleton /> : null}
+          {!isLoading && !hasError && morePicksDishes.length > 0 ? (
+            <RecommendedSection
+              title="Recommended picks"
+              dishes={morePicksDishes}
+              imageIndexOffset={6}
+            />
+          ) : null}
           {hasError ? (
             <ErrorState
               message="Could not load restaurants."
@@ -162,47 +158,22 @@ export function HomeScreen() {
 
           {!isLoading && !hasError ? (
             <>
-              <PremiumText variant="sectionTitle" style={styles.sectionTitle}>
-                {filterId === 'fast'
-                  ? 'Lightning delivery'
-                  : filterId === 'off'
-                    ? 'Top offers near you'
-                    : personalizedTitle}
-              </PremiumText>
-              <ScrollView
-                horizontal
-                nestedScrollEnabled
-                showsHorizontalScrollIndicator={false}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.carousel}
-              >
-                {personalized.map((r) => (
-                  <RestaurantTileCard
-                    key={r.id}
-                    restaurant={r}
-                    width={cardWidth}
-                  />
-                ))}
-              </ScrollView>
+              <HomeRestaurantCarousel
+                title={personalizedTitle}
+                restaurants={personalized}
+              />
 
-              <PremiumText variant="sectionTitle" style={styles.sectionTitle}>
-                Explore more
-              </PremiumText>
-              <ScrollView
-                horizontal
-                nestedScrollEnabled
-                showsHorizontalScrollIndicator={false}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.carousel}
-              >
-                {exploreRestaurants.map((r) => (
-                  <RestaurantTileCard
-                    key={`more-${r.id}`}
-                    restaurant={r}
-                    width={cardWidth}
-                  />
-                ))}
-              </ScrollView>
+              {!isLoading && !hasError && morePicksDishes.length > 0 ? (
+                <RecommendedSection
+                  title="Recommended picks"
+                  dishes={morePicksDishes}
+                  imageIndexOffset={6}
+                />
+              ) : null}
+              <HomeRestaurantCarousel
+                title="Explore for you"
+                restaurants={exploreRestaurants}
+              />
             </>
           ) : null}
         </View>
@@ -227,22 +198,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingTop: spacing.sm,
   },
-  sectionTitle: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  carousel: {
-    paddingLeft: spacing.lg,
-    paddingRight: spacing.sm,
-    paddingBottom: spacing.xl,
-  },
   skeleton: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.lg,
-  },
-  skeletonRow: {
-    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
     gap: spacing.md,
+    marginTop: spacing.lg,
   },
 });

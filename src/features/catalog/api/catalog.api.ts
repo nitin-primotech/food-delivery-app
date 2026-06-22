@@ -60,6 +60,17 @@ export function searchRestaurants(query: string, signal?: AbortSignal) {
   return simulateRequest(results, { delayMs: 700 });
 }
 
+export function fetchCategoryById(id: string, signal?: AbortSignal) {
+  if (signal?.aborted) {
+    return Promise.reject(new DOMException('Aborted', 'AbortError'));
+  }
+  const category = categories.find((c) => c.id === id);
+  if (!category) {
+    return Promise.reject(new Error('Category not found'));
+  }
+  return simulateRequest(category, { delayMs: 400 });
+}
+
 export function fetchRestaurantsByCategory(
   categoryId: string,
   signal?: AbortSignal,

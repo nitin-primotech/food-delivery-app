@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   card: {
     height: SLIDE_HEIGHT,
-    borderRadius: radius.xl,
+    borderRadius: radius.sm,
     overflow: 'hidden',
     borderCurve: 'continuous',
     backgroundColor: colors.backgroundMuted,

@@ -1,92 +1,210 @@
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { PremiumText } from '@/shared/components/premium-text';
 import { selectAddress, useAppStore } from '@/store/app.store';
+import {
+  openCartSheet,
+  selectCartItemCount,
+  useCartStore,
+} from '@/store/cart.store';
 import { colors } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
+import { fonts } from '@/theme/typography';
+
+const NOTIFICATION_COUNT = 3;
+const LOCATION_GREEN = '#1A4D2E';
+
+function IconBadge({
+  count,
+  tone,
+}: {
+  count: number;
+  tone: 'danger' | 'success';
+}) {
+  if (count <= 0) return null;
+
+  return (
+    <View
+      style={[
+        styles.badge,
+        tone === 'danger' ? styles.badgeDanger : styles.badgeSuccess,
+      ]}
+    >
+      <Text style={styles.badgeText}>{count > 9 ? '9+' : String(count)}</Text>
+    </View>
+  );
+}
 
 export function HomeHeader() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const address = useAppStore(selectAddress);
+  const cartCount = useCartStore(selectCartItemCount);
 
   return (
-    <View style={styles.wrap}>
-      <Pressable
-        style={styles.location}
-        onPress={() => router.push('/location')}
-        accessibilityRole="button"
-        accessibilityLabel={`Delivery location, ${address.label}`}
-      >
-        <AppSymbol name="location.fill" size={18} tintColor={colors.primary} />
-        <PremiumText
-          variant="h3"
-          color={colors.textPrimary}
-          numberOfLines={1}
-          style={styles.locationLabel}
-        >
-          {address.label}
-        </PremiumText>
-        <AppSymbol
-          name="chevron.down"
-          size={11}
-          tintColor={colors.textSecondary}
-        />
-      </Pressable>
-
-      <Link href="/(tabs)/profile" asChild>
+    <View style={[styles.wrap, { paddingTop: insets.top + spacing.xs }]}>
+      <View style={styles.row}>
         <Pressable
-          style={styles.bell}
+          style={styles.menuBtn}
+          onPress={() => router.push('/(tabs)/profile')}
           accessibilityRole="button"
-          accessibilityLabel="Notifications and profile"
+          accessibilityLabel="Menu"
         >
           <AppSymbol
-            name="bell.fill"
+            name="line.3.horizontal"
             size={20}
             tintColor={colors.textPrimary}
           />
-          <View style={styles.notifDot} />
         </Pressable>
-      </Link>
+
+        <View style={styles.divider} />
+
+        <Pressable
+          style={styles.location}
+          onPress={() => router.push('/location')}
+          accessibilityRole="button"
+          accessibilityLabel={`Deliver to ${address.line2}`}
+        >
+          <Text style={styles.deliverLabel}>Deliver to</Text>
+          <View style={styles.locationRow}>
+            <Text
+              style={styles.locationLabel}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {address.line2}
+            </Text>
+            <AppSymbol
+              name="chevron.down"
+              size={11}
+              tintColor={LOCATION_GREEN}
+              style={styles.chevron}
+            />
+          </View>
+        </Pressable>
+
+        <View style={styles.actions}>
+          <Link href="/(tabs)/profile" asChild>
+            <Pressable
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel={`Notifications, ${NOTIFICATION_COUNT} unread`}
+            >
+              <AppSymbol name="bell" size={20} tintColor={colors.textPrimary} />
+              <IconBadge count={NOTIFICATION_COUNT} tone="danger" />
+            </Pressable>
+          </Link>
+
+          <Pressable
+            style={styles.iconBtn}
+            onPress={() => openCartSheet()}
+            accessibilityRole="button"
+            accessibilityLabel={`Cart, ${cartCount} items`}
+          >
+            <AppSymbol name="cart" size={20} tintColor={colors.textPrimary} />
+            <IconBadge count={cartCount} tone="success" />
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
+    backgroundColor: colors.background,
+    paddingBottom: spacing.xxs,
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    minHeight: 44,
-    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    height: 44,
+  },
+  menuBtn: {
+    width: 28,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    height: 28,
+    backgroundColor: colors.borderStrong,
+    marginLeft: spacing.xs,
+    marginRight: spacing.sm,
+    flexShrink: 0,
   },
   location: {
     flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+    paddingRight: spacing.xs,
+  },
+  deliverLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 13,
+    color: colors.textSecondary,
+    marginBottom: 1,
+  },
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginRight: spacing.md,
+    minWidth: 0,
   },
   locationLabel: {
-    flexShrink: 1,
+    flex: 1,
+    minWidth: 0,
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    lineHeight: 18,
+    color: LOCATION_GREEN,
   },
-  bell: {
-    width: 44,
+  chevron: {
+    flexShrink: 0,
+    marginLeft: 2,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 0,
+    gap: spacing.sm,
+    marginLeft: spacing.xs,
+  },
+  iconBtn: {
+    width: 32,
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  notifDot: {
+  badge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 7,
-    height: 7,
+    top: 6,
+    right: -4,
+    minWidth: 16,
+    height: 16,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
     borderWidth: 1.5,
     borderColor: colors.background,
+  },
+  badgeDanger: {
+    backgroundColor: colors.danger,
+  },
+  badgeSuccess: {
+    backgroundColor: colors.success,
+  },
+  badgeText: {
+    fontFamily: fonts.bold,
+    fontSize: 9,
+    lineHeight: 11,
+    color: colors.textInverse,
+    textAlign: 'center',
   },
 });

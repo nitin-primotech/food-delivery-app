@@ -1,79 +1,70 @@
 import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Category } from '@/features/catalog/types/catalog.types';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { PremiumText } from '@/shared/components/premium-text';
-import { colors, shadows } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fonts } from '@/theme/typography';
 
-const ITEM_SIZE = 72;
-const ITEM_GAP = spacing.lg;
+const TILE_SIZE = 76;
+const TILE_RADIUS = 16;
+const ITEM_GAP = spacing.md;
 
 type FoodCategoryStripProps = {
   categories: Category[];
-  selectedId?: string | null;
-  onSelect?: (id: string | null) => void;
 };
 
-export function FoodCategoryStrip({
-  categories,
-  selectedId,
-  onSelect,
-}: FoodCategoryStripProps) {
+export function FoodCategoryStrip({ categories }: FoodCategoryStripProps) {
+  const router = useRouter();
+
   return (
     <View style={styles.wrap}>
       <ScrollView
         horizontal
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
         decelerationRate="fast"
         contentContainerStyle={styles.row}
       >
-        {categories.map((cat) => {
-          const active = selectedId === cat.id;
-          return (
-            <Pressable
-              key={cat.id}
-              style={styles.item}
-              onPress={() => onSelect?.(active ? null : cat.id)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-            >
-              <View
-                style={[
-                  styles.circle,
-                  shadows.soft,
-                  active && styles.circleActive,
-                ]}
-              >
-                <Image
-                  source={{ uri: cat.image }}
-                  style={styles.image}
-                  contentFit="cover"
-                  transition={200}
-                />
-                {active ? (
-                  <View style={styles.checkBadge}>
-                    <AppSymbol
-                      name="checkmark.circle.fill"
-                      size={24}
-                      tintColor={colors.primary}
-                    />
-                  </View>
-                ) : null}
-              </View>
-              <PremiumText
-                variant="captionMedium"
-                color={active ? colors.textPrimary : colors.textSecondary}
-                numberOfLines={1}
-              >
-                {cat.name}
-              </PremiumText>
-            </Pressable>
-          );
-        })}
+        {categories.map((cat) => (
+          <Pressable
+            key={cat.id}
+            style={styles.item}
+            onPress={() => router.push(`/category/${cat.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`Browse ${cat.name}`}
+          >
+            <View style={styles.tile}>
+              <Image
+                source={{ uri: cat.image }}
+                style={styles.image}
+                contentFit="cover"
+                transition={200}
+              />
+            </View>
+            <Text style={styles.label} numberOfLines={2}>
+              {cat.name}
+            </Text>
+          </Pressable>
+        ))}
+
+        <Pressable
+          style={styles.item}
+          onPress={() => router.push('/(tabs)/search')}
+          accessibilityRole="button"
+          accessibilityLabel="Browse more categories"
+        >
+          <View style={[styles.tile, styles.moreTile]}>
+            <AppSymbol
+              name="circle.grid.2x2.fill"
+              size={24}
+              tintColor={colors.textSecondary}
+            />
+          </View>
+          <Text style={styles.label}>More</Text>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -82,43 +73,42 @@ export function FoodCategoryStrip({
 const styles = StyleSheet.create({
   wrap: {
     marginTop: spacing.sm,
+    marginBottom: spacing.sm,
   },
   row: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     gap: ITEM_GAP,
     paddingVertical: spacing.xs,
   },
   item: {
     alignItems: 'center',
-    width: ITEM_SIZE + 8,
+    width: TILE_SIZE + 4,
     gap: spacing.sm,
   },
-  circle: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    borderRadius: radius.full,
+  tile: {
+    width: TILE_SIZE,
+    height: TILE_SIZE,
+    borderRadius: TILE_RADIUS,
     backgroundColor: colors.backgroundElevated,
-    alignItems: 'center',
-    justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border,
     borderCurve: 'continuous',
   },
-  circleActive: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  checkBadge: {
-    position: 'absolute',
-    right: -2,
-    bottom: -2,
-    backgroundColor: colors.backgroundElevated,
-    borderRadius: radius.full,
-    padding: 1,
+  moreTile: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.backgroundMuted,
   },
   image: {
     width: '100%',
     height: '100%',
+  },
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 15,
+    color: colors.textPrimary,
+    textAlign: 'center',
   },
 });

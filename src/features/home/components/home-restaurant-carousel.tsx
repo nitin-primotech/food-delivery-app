@@ -1,32 +1,29 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
-
+import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { HomeSectionHeader } from '@/features/home/components/home-section-header';
-import { TopPicksProductCard } from '@/features/home/components/top-picks-product-card';
-import type { RecommendedDish } from '@/features/home/utils/get-recommended-dishes';
+import { RestaurantTileCard } from '@/features/home/components/restaurant-tile-card';
 import { useCarouselItemWidth } from '@/shared/hooks/use-carousel-item-width';
 import { spacing } from '@/theme/spacing';
 
-type RecommendedSectionProps = {
-  dishes: RecommendedDish[];
-  title?: string;
-  imageIndexOffset?: number;
+type HomeRestaurantCarouselProps = {
+  title: string;
+  restaurants: Restaurant[];
 };
 
-export function RecommendedSection({
-  dishes,
-  title = 'Top Picks for You',
-  imageIndexOffset = 0,
-}: RecommendedSectionProps) {
+export function HomeRestaurantCarousel({
+  title,
+  restaurants,
+}: HomeRestaurantCarouselProps) {
   const router = useRouter();
   const cardWidth = useCarouselItemWidth({
-    visibleCount: 2.2,
-    peek: 0.03,
+    visibleCount: 1.55,
+    peek: 0.08,
     gap: spacing.md,
     paddingEnd: spacing.md,
   });
 
-  if (dishes.length === 0) return null;
+  if (restaurants.length === 0) return null;
 
   return (
     <View style={styles.wrap}>
@@ -34,19 +31,17 @@ export function RecommendedSection({
         title={title}
         onViewAll={() => router.push('/(tabs)/search')}
       />
-
       <ScrollView
         horizontal
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.row}
       >
-        {dishes.map((dish, index) => (
-          <TopPicksProductCard
-            key={`${dish.restaurantId}-${dish.item.id}`}
-            dish={dish}
+        {restaurants.map((restaurant, index) => (
+          <RestaurantTileCard
+            key={`${title}-${restaurant.id}-${index}`}
+            restaurant={restaurant}
             width={cardWidth}
-            imageIndex={imageIndexOffset + index}
           />
         ))}
       </ScrollView>
@@ -56,11 +51,11 @@ export function RecommendedSection({
 
 const styles = StyleSheet.create({
   wrap: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
+    marginTop: spacing.lg,
   },
   row: {
     paddingLeft: spacing.md,
     paddingRight: spacing.xs,
+    paddingBottom: spacing.sm,
   },
 });

@@ -1,12 +1,15 @@
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { PremiumText } from '@/shared/components/premium-text';
-import { colors, shadows } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { fonts } from '@/theme/typography';
+
+const CARD_RADIUS = 14;
+const IMAGE_HEIGHT = 132;
 
 type RestaurantTileCardProps = {
   restaurant: Restaurant;
@@ -32,45 +35,55 @@ export function RestaurantTileCard({
             transition={250}
           />
           <View style={styles.heart} pointerEvents="none">
-            <AppSymbol name="heart" size={16} tintColor={colors.textInverse} />
+            <AppSymbol name="heart" size={14} tintColor={colors.textInverse} />
           </View>
           {restaurant.isFastDelivery ? (
-            <View style={styles.boltBadge}>
-              <PremiumText variant="label" color={colors.textInverse}>
-                10 MIN
-              </PremiumText>
+            <View style={styles.fastBadge}>
+              <Text style={styles.fastBadgeText}>Fast</Text>
             </View>
           ) : null}
           {offer ? (
             <View style={styles.offerBar}>
-              <PremiumText variant="label" color={colors.textInverse}>
+              <Text style={styles.offerText} numberOfLines={1}>
                 {offer.toUpperCase()}
-              </PremiumText>
+              </Text>
             </View>
           ) : null}
         </View>
-        <PremiumText variant="bodyMedium" numberOfLines={1} style={styles.name}>
-          {restaurant.name}
-        </PremiumText>
-        <View style={styles.meta}>
-          <AppSymbol name="star.fill" size={13} tintColor={colors.star} />
-          <PremiumText variant="captionMedium" color={colors.textPrimary}>
-            {restaurant.rating.toFixed(1)}
-          </PremiumText>
-          <PremiumText variant="caption" color={colors.textTertiary}>
-            ·
-          </PremiumText>
-          <PremiumText variant="captionMedium" color={colors.textSecondary}>
-            {restaurant.deliveryTimeMin}–{restaurant.deliveryTimeMax} mins
-          </PremiumText>
+
+        <View style={styles.body}>
+          <View style={styles.titleRow}>
+            <Image
+              source={{ uri: restaurant.logoImage }}
+              style={styles.logo}
+              contentFit="cover"
+              transition={200}
+            />
+            <View style={styles.titleCopy}>
+              <Text style={styles.name} numberOfLines={1}>
+                {restaurant.name}
+              </Text>
+              <Text style={styles.cuisine} numberOfLines={1}>
+                {restaurant.cuisine}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.meta}>
+            <AppSymbol name="star.fill" size={11} tintColor={colors.star} />
+            <Text style={styles.metaText}>{restaurant.rating.toFixed(1)}</Text>
+            <Text style={styles.metaDot}>·</Text>
+            <Text style={styles.metaText}>
+              {restaurant.deliveryTimeMin}–{restaurant.deliveryTimeMax} mins
+            </Text>
+            {restaurant.isFreeDelivery ? (
+              <>
+                <Text style={styles.metaDot}>·</Text>
+                <Text style={styles.metaHighlight}>Free delivery</Text>
+              </>
+            ) : null}
+          </View>
         </View>
-        <PremiumText
-          variant="caption"
-          color={colors.textTertiary}
-          numberOfLines={1}
-        >
-          {restaurant.cuisine.split('·')[0]?.trim()}
-        </PremiumText>
       </Pressable>
     </Link>
   );
@@ -79,16 +92,17 @@ export function RestaurantTileCard({
 const styles = StyleSheet.create({
   card: {
     marginRight: spacing.md,
+    backgroundColor: colors.backgroundElevated,
+    borderRadius: CARD_RADIUS,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
   },
   imageWrap: {
     width: '100%',
-    height: 212,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
+    height: IMAGE_HEIGHT,
     backgroundColor: colors.backgroundMuted,
-    borderCurve: 'continuous',
-    ...shadows.soft,
   },
   image: {
     width: '100%',
@@ -98,38 +112,103 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
-    width: 34,
-    height: 34,
-    borderRadius: radius.full,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    width: 28,
+    height: 28,
+    borderRadius: CARD_RADIUS,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  boltBadge: {
+  fastBadge: {
     position: 'absolute',
     top: spacing.sm,
     left: spacing.sm,
-    backgroundColor: colors.danger,
+    backgroundColor: colors.primary,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: radius.full,
+    borderRadius: 8,
+    borderCurve: 'continuous',
+  },
+  fastBadgeText: {
+    fontFamily: fonts.semibold,
+    fontSize: 10,
+    lineHeight: 12,
+    color: colors.textInverse,
+    letterSpacing: 0.2,
   },
   offerBar: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.78)',
-    paddingVertical: spacing.xs,
+    left: spacing.sm,
+    right: spacing.sm,
+    bottom: spacing.sm,
+    backgroundColor: 'rgba(28, 28, 30, 0.82)',
+    paddingVertical: 5,
     paddingHorizontal: spacing.sm,
+    borderRadius: 8,
+    borderCurve: 'continuous',
+  },
+  offerText: {
+    fontFamily: fonts.semibold,
+    fontSize: 10,
+    lineHeight: 12,
+    color: colors.textInverse,
+    letterSpacing: 0.3,
+  },
+  body: {
+    padding: spacing.sm,
+    gap: spacing.xs,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderCurve: 'continuous',
+    backgroundColor: colors.backgroundMuted,
+  },
+  titleCopy: {
+    flex: 1,
+    minWidth: 0,
   },
   name: {
-    marginBottom: 4,
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textPrimary,
+  },
+  cuisine: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textSecondary,
+    marginTop: 1,
   },
   meta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginBottom: 2,
+    flexWrap: 'wrap',
+    gap: 3,
+  },
+  metaText: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textSecondary,
+  },
+  metaDot: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textTertiary,
+  },
+  metaHighlight: {
+    fontFamily: fonts.semibold,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.success,
   },
 });

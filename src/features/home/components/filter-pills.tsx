@@ -2,8 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { PremiumText } from '@/shared/components/premium-text';
 import { hapticSelection } from '@/shared/haptics/feedback';
-import { colors, shadows } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 const FILTERS = [
   { id: 'off', label: 'MIN $10 OFF', accent: true },
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
+    borderRadius: 14,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
     borderCurve: 'continuous',
@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundElevated,
     borderWidth: 1.5,
     borderColor: colors.primaryLight,
-    ...shadows.soft,
   },
   pillAccentActive: {
     backgroundColor: colors.primary,
@@ -84,7 +83,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundElevated,
     borderWidth: 1,
     borderColor: colors.border,
-    ...shadows.soft,
   },
   pillNeutralActive: {
     borderColor: colors.primary,
