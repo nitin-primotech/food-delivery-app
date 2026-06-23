@@ -1,6 +1,5 @@
 import { Link, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { selectAddress, useAppStore } from '@/store/app.store';
@@ -39,12 +38,11 @@ function IconBadge({
 
 export function HomeHeader() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const address = useAppStore(selectAddress);
   const cartCount = useCartStore(selectCartItemCount);
 
   return (
-    <View style={[styles.wrap, { paddingTop: insets.top + spacing.xs }]}>
+    <View style={[styles.wrap, { paddingTop: spacing.xs }]}>
       <View style={styles.row}>
         <Pressable
           style={styles.menuBtn}

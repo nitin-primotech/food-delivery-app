@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.foodRush"
+      "bundleIdentifier": "com.anonymous.foodRush",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["tez", "phonepe", "paytmmp", "bhim"]
+      }
     },
     "android": {
       "adaptiveIcon": {

@@ -1,5 +1,6 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeInUp,
   useAnimatedStyle,
@@ -8,40 +9,39 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { formatInr } from '@/features/checkout/utils/format-currency';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import {
-  CartThumbStack,
-  cartThumbStackWidth,
-} from '@/shared/components/cart-thumb-stack';
-import { PremiumText } from '@/shared/components/premium-text';
 import { hapticCartOpen, hapticPressIn } from '@/shared/haptics/feedback';
 import {
   openCartSheet,
   selectCartItemCount,
-  selectCartPreviewThumbsStable,
+  selectCartSubtotal,
   selectLastAdded,
   useCartStore,
 } from '@/store/cart.store';
 import { colors } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 import { floatingCartBottomOffset } from '@/theme/tab-bar';
+import { fonts } from '@/theme/typography';
 
 const CART_BAR_ENTER = FadeInUp.springify().damping(18).stiffness(220);
+const BAR_WIDTH = '90%';
 
 export function FloatingCartBar() {
   const insets = useSafeAreaInsets();
   const itemCount = useCartStore(selectCartItemCount);
-  const previewThumbs = useCartStore(selectCartPreviewThumbsStable);
+  const subtotal = useCartStore(selectCartSubtotal);
   const lastAdded = useCartStore(selectLastAdded);
   const pulse = useSharedValue(1);
 
   useEffect(() => {
     if (!lastAdded) return;
     pulse.value = withSequence(
-      withSpring(1.04, { damping: 14, stiffness: 280 }),
+      withSpring(1.02, { damping: 14, stiffness: 280 }),
       withSpring(1, { damping: 16, stiffness: 220 }),
     );
-  }, [lastAdded?.lineKey]);
+  }, [lastAdded?.lineKey, pulse, lastAdded]);
 
   const barStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulse.value }],
@@ -57,8 +57,8 @@ export function FloatingCartBar() {
     openCartSheet();
   }
 
-  const itemLabel = itemCount === 1 ? '1 Item' : `${itemCount} Items`;
-  const stackWidth = cartThumbStackWidth(previewThumbs.length);
+  const countLabel = itemCount === 1 ? '1 item' : `${itemCount} items`;
+  const badgeLabel = itemCount > 99 ? '99+' : String(itemCount);
 
   return (
     <Animated.View
@@ -70,33 +70,50 @@ export function FloatingCartBar() {
       ]}
       pointerEvents="box-none"
     >
+      <LinearGradient
+        colors={[
+          'rgba(250, 248, 245, 0)',
+          'rgba(250, 248, 245, 0.88)',
+          colors.background,
+        ]}
+        locations={[0, 0.55, 1]}
+        style={styles.bottomScrim}
+        pointerEvents="none"
+      />
+
       <Pressable
         onPress={handlePress}
         onPressIn={hapticPressIn}
         style={styles.bar}
         accessibilityRole="button"
-        accessibilityLabel={`View cart, ${itemLabel}`}
+        accessibilityLabel={`View cart, ${countLabel}, total ${formatInr(subtotal)}`}
       >
-        <View style={[styles.stackSlot, { width: stackWidth }]}>
-          <CartThumbStack
-            thumbs={previewThumbs}
-            highlightId={lastAdded?.lineKey}
-          />
+        <View style={styles.accentStripe} pointerEvents="none" />
+
+        <View style={styles.iconWrap}>
+          <View style={styles.iconCircle}>
+            <AppSymbol name="cart.fill" size={22} tintColor={colors.primary} />
+          </View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badgeLabel}</Text>
+          </View>
         </View>
 
         <View style={styles.copy}>
-          <PremiumText variant="bodyMedium" color={colors.textInverse}>
-            View cart
-          </PremiumText>
-          <PremiumText variant="caption" color={colors.textOnDarkMuted}>
-            {itemLabel}
-          </PremiumText>
+          <Text style={styles.copyLine} numberOfLines={1}>
+            <Text style={styles.copyAccent}>{countLabel}</Text>
+            <Text style={styles.copyRest}> in your cart</Text>
+          </Text>
+          <Text style={styles.totalLine}>Total {formatInr(subtotal)}</Text>
         </View>
 
-        <View style={styles.chevronWrap}>
+        <View style={styles.divider} />
+
+        <View style={styles.cta}>
+          <Text style={styles.ctaText}>View cart</Text>
           <AppSymbol
             name="chevron.right"
-            size={16}
+            size={12}
             tintColor={colors.textInverse}
           />
         </View>
@@ -113,36 +130,125 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 100,
   },
+  bottomScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: -spacing.xl,
+    height: 120,
+  },
   bar: {
+    width: BAR_WIDTH,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-    paddingLeft: spacing.xs,
-    paddingRight: spacing.xxs,
-    paddingVertical: spacing.xs,
+    backgroundColor: colors.backgroundElevated,
+    borderRadius: 6,
     borderCurve: 'continuous',
-    boxShadow: '0 8px 24px rgba(212, 84, 60, 0.34)',
-    overflow: 'visible',
+    borderWidth: 1.5,
+    borderColor: colors.borderStrong,
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.sm + 4,
+    paddingRight: spacing.sm,
+    gap: spacing.sm,
+    overflow: 'hidden',
+    boxShadow:
+      '0 16px 40px rgba(28, 28, 30, 0.16), 0 6px 16px rgba(28, 28, 30, 0.1), 0 0 0 1px rgba(28, 28, 30, 0.04)',
   },
-  stackSlot: {
-    height: 40,
-    justifyContent: 'center',
-    overflow: 'visible',
-    marginLeft: spacing.xxs,
+  accentStripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    backgroundColor: colors.primary,
   },
-  copy: {
-    gap: 1,
-    minWidth: 72,
-  },
-  chevronWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  iconWrap: {
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.xxs,
+  },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(212, 84, 60, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 84, 60, 0.22)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    borderCurve: 'continuous',
+    backgroundColor: colors.primary,
+    borderWidth: 2,
+    borderColor: colors.backgroundElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    fontFamily: fonts.bold,
+    fontSize: 9,
+    lineHeight: 11,
+    color: colors.textInverse,
+  },
+  copy: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  copyLine: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textPrimary,
+  },
+  copyAccent: {
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.primary,
+  },
+  copyRest: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textPrimary,
+  },
+  totalLine: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    lineHeight: 13,
+    color: colors.textSecondary,
+  },
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
+    backgroundColor: colors.divider,
+    marginVertical: 2,
+  },
+  cta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+    borderCurve: 'continuous',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 9,
+  },
+  ctaText: {
+    fontFamily: fonts.semibold,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textInverse,
   },
 });

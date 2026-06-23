@@ -64,6 +64,15 @@ export default function RootLayout() {
     return () => cancelAnimationFrame(handle);
   }, [inAuth, onLocation, hideCartRoute, isAuthenticated, onboardingComplete]);
 
+  const tabSegment = segments[0] === '(tabs)' ? segments[1] : undefined;
+  const isHomeTab =
+    segments[0] === '(tabs)' &&
+    tabSegment !== 'profile' &&
+    tabSegment !== 'orders' &&
+    tabSegment !== 'search';
+  const showFloatingCartBar = showCartChrome && isHomeTab;
+  const showCartSheet = showCartChrome;
+
   if (!loaded) {
     return null;
   }
@@ -124,23 +133,23 @@ export default function RootLayout() {
           <Stack.Screen
             name="order-success"
             options={{
-              presentation: 'modal',
+              headerShown: false,
               animation: 'fade',
+              gestureEnabled: false,
             }}
           />
           <Stack.Screen
             name="order/[id]"
             options={{
-              headerShown: true,
-              title: 'Track order',
+              headerShown: false,
               animation: 'slide_from_right',
             }}
           />
         </Stack>
-        {showCartChrome ? (
+        {showCartSheet ? (
           <>
             <CartDropAnimation />
-            <FloatingCartBar />
+            {showFloatingCartBar ? <FloatingCartBar /> : null}
             <CartBottomSheet />
           </>
         ) : null}

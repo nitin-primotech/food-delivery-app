@@ -1,10 +1,9 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { LinearTransition, ZoomIn } from 'react-native-reanimated';
 
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { PremiumText } from '@/shared/components/premium-text';
 import { colors } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { fonts } from '@/theme/typography';
 
 type CartLineStepperProps = {
   quantity: number;
@@ -29,7 +28,7 @@ export function CartLineStepper({
         accessibilityRole="button"
         accessibilityLabel="Decrease quantity"
       >
-        <AppSymbol name="minus" size={14} tintColor={colors.primary} />
+        <AppSymbol name="minus" size={12} tintColor={colors.primary} />
       </Pressable>
       <Animated.View
         key={quantity}
@@ -37,9 +36,7 @@ export function CartLineStepper({
         layout={LAYOUT}
         style={styles.qtyWrap}
       >
-        <PremiumText variant="captionMedium" color={colors.primary}>
-          {quantity}
-        </PremiumText>
+        <Text style={styles.qty}>{quantity}</Text>
       </Animated.View>
       <Pressable
         onPress={onIncrease}
@@ -48,7 +45,7 @@ export function CartLineStepper({
         accessibilityRole="button"
         accessibilityLabel="Increase quantity"
       >
-        <AppSymbol name="plus" size={14} tintColor={colors.primary} />
+        <AppSymbol name="plus" size={12} tintColor={colors.primary} />
       </Pressable>
     </View>
   );
@@ -59,22 +56,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.backgroundElevated,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.primary,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.xxs,
-    paddingVertical: 2,
-    minWidth: 88,
+    borderRadius: 8,
     borderCurve: 'continuous',
+    paddingHorizontal: 2,
+    paddingVertical: 1,
+    minWidth: 76,
   },
   btn: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
   qtyWrap: {
-    minWidth: 20,
+    minWidth: 18,
     alignItems: 'center',
+  },
+  qty: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    lineHeight: 15,
+    color: colors.primary,
   },
 });

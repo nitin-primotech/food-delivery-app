@@ -51,10 +51,27 @@ export const ICON_REGISTRY: Record<string, CrossPlatformSymbol> = {
   'questionmark.circle.fill': icon('questionmark.circle.fill', 'help'),
   'clock.arrow.circlepath': icon('clock.arrow.circlepath', 'history'),
   'leaf.fill': icon('leaf.fill', 'eco'),
+  'truck.box.fill': icon('truck.box.fill', 'local_shipping'),
+  'info.circle': icon('info.circle', 'info'),
+  'building.columns.fill': icon('building.columns.fill', 'account_balance'),
   'circle.grid.2x2.fill': icon('circle.grid.2x2.fill', 'grid_view'),
   'birthday.cake.fill': icon('birthday.cake.fill', 'cake'),
   'cup.and.saucer.fill': icon('cup.and.saucer.fill', 'coffee'),
   'bag.fill': icon('bag.fill', 'shopping_bag'),
+  'phone.fill': icon('phone.fill', 'phone'),
+  'message.fill': icon('message.fill', 'chat'),
+  'shippingbox.fill': icon('shippingbox.fill', 'inventory_2'),
+  'shield.fill': icon('shield.fill', 'shield'),
+  headphones: icon('headphones', 'headphones'),
+  'gearshape.fill': icon('gearshape.fill', 'settings'),
+  'tag.fill': icon('tag.fill', 'local_offer'),
+  'crown.fill': icon('crown.fill', 'workspace_premium'),
+  'doc.text.fill': icon('doc.text.fill', 'description'),
+  'wallet.pass.fill': icon('wallet.pass.fill', 'account_balance_wallet'),
+  'rectangle.portrait.and.arrow.right': icon(
+    'rectangle.portrait.and.arrow.right',
+    'logout',
+  ),
 };
 
 export function resolveSymbol(name: string): CrossPlatformSymbol | null {

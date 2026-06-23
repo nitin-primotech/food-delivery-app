@@ -4,7 +4,7 @@ import {
   simulateRequest,
 } from '@/shared/utils/simulate-request';
 
-export const TOKEN_TTL_MS = 10 * 60 * 1000;
+export const TOKEN_TTL_MS = 2 * 60 * 60 * 1000;
 const OTP_TTL_MS = 2 * 60 * 1000;
 const DEMO_OTP = '1234';
 

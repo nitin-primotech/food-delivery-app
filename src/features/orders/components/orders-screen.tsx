@@ -1,144 +1,180 @@
-import { Image } from 'expo-image';
-import { Link, useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import type { Order } from '@/features/catalog/types/catalog.types';
+import { OrderListCard } from '@/features/orders/components/order-list-card';
+import { OrdersSummaryCard } from '@/features/orders/components/orders-summary-card';
+import {
+  ORDER_TABS,
+  type OrderTabId,
+} from '@/features/orders/constants/orders.constants';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
+import { AppSymbol } from '@/shared/components/app-symbol';
 import { EmptyState } from '@/shared/components/empty-state';
-import { PremiumText } from '@/shared/components/premium-text';
+import { hapticSoftTap } from '@/shared/haptics/feedback';
+import {
+  openCartSheet,
+  selectCartItemCount,
+  useCartStore,
+} from '@/store/cart.store';
 import { selectOrders, useOrdersStore } from '@/store/orders.store';
-import { colors, screens, shadows } from '@/theme/colors';
-import { screenTopPadding } from '@/theme/screen-edge';
-import { radius, spacing } from '@/theme/spacing';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { tabBarContentPadding } from '@/theme/tab-bar';
+import { fonts } from '@/theme/typography';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: 'Confirmed',
-  preparing: 'Preparing',
-  on_the_way: 'On the way',
-  delivered: 'Delivered',
-};
+function filterOrdersByTab(orders: Order[], tab: OrderTabId): Order[] {
+  switch (tab) {
+    case 'all':
+      return orders;
+    case 'to_pay':
+      return orders.filter((o) => o.status === 'confirmed');
+    case 'processing':
+      return orders.filter(
+        (o) => o.status === 'confirmed' || o.status === 'preparing',
+      );
+    case 'shipped':
+      return orders.filter((o) => o.status === 'on_the_way');
+    case 'delivered':
+      return orders.filter((o) => o.status === 'delivered');
+    case 'cancelled':
+      return [];
+  }
+}
 
 export function OrdersScreen() {
   const router = useRouter();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const insets = useSafeAreaInsets();
   const orders = useOrdersStore(selectOrders);
-  const active = orders.find((o) => o.status !== 'delivered');
+  const cartCount = useCartStore(selectCartItemCount);
+  const initialTab =
+    tab && ORDER_TABS.some((entry) => entry.id === tab)
+      ? (tab as OrderTabId)
+      : 'all';
+  const [activeTab, setActiveTab] = useState<OrderTabId>(initialTab);
+
+  const filteredOrders = useMemo(
+    () => filterOrdersByTab(orders, activeTab),
+    [orders, activeTab],
+  );
+
+  const totalSpent = useMemo(
+    () => orders.reduce((sum, order) => sum + order.total, 0),
+    [orders],
+  );
 
   return (
     <View style={styles.root}>
       <AppStatusBar style="dark" />
+
+      <View style={[styles.header, { paddingTop: insets.top + spacing.xs }]}>
+        <Text style={styles.headerTitle}>My Orders</Text>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => {
+              hapticSoftTap();
+              router.push('/(tabs)');
+            }}
+            hitSlop={10}
+            style={styles.iconBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Search"
+          >
+            <AppSymbol
+              name="magnifyingglass"
+              size={20}
+              tintColor={colors.textPrimary}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              hapticSoftTap();
+              openCartSheet();
+            }}
+            hitSlop={10}
+            style={styles.iconBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Cart"
+          >
+            <AppSymbol name="cart" size={20} tintColor={colors.textPrimary} />
+            {cartCount > 0 ? (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>
+                  {cartCount > 9 ? '9+' : cartCount}
+                </Text>
+              </View>
+            ) : null}
+          </Pressable>
+        </View>
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabsScroll}
+        contentContainerStyle={styles.tabsContent}
+      >
+        {ORDER_TABS.map((tab) => {
+          const selected = activeTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() => {
+                hapticSoftTap();
+                setActiveTab(tab.id);
+              }}
+              style={styles.tab}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+            >
+              <Text
+                style={[styles.tabLabel, selected && styles.tabLabelActive]}
+              >
+                {tab.label}
+              </Text>
+              {selected ? <View style={styles.tabIndicator} /> : null}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
       <ScrollView
         style={styles.screen}
-        contentInsetAdjustmentBehavior="never"
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.content,
-          {
-            paddingTop: screenTopPadding(insets.top),
-            paddingBottom: tabBarContentPadding(insets.bottom),
-          },
+          { paddingBottom: tabBarContentPadding(insets.bottom) },
         ]}
       >
-        <PremiumText variant="display">Orders</PremiumText>
-
-        {active ? (
-          <Link href={`/order/${active.id}`} asChild>
-            <AnimatedPressable
-              entering={FadeInDown.duration(400)}
-              style={styles.activeCard}
-            >
-              <PremiumText variant="label" color={colors.primary}>
-                Active order
-              </PremiumText>
-              <PremiumText variant="h3">{active.restaurantName}</PremiumText>
-              <View style={styles.progress}>
-                {(
-                  ['confirmed', 'preparing', 'on_the_way', 'delivered'] as const
-                ).map((step, i) => {
-                  const steps = [
-                    'confirmed',
-                    'preparing',
-                    'on_the_way',
-                    'delivered',
-                  ];
-                  const idx = steps.indexOf(active.status);
-                  const done = i <= idx;
-                  return (
-                    <View key={step} style={styles.stepRow}>
-                      <View
-                        style={[
-                          styles.dot,
-                          {
-                            backgroundColor: done
-                              ? screens.tracking.activeStep
-                              : screens.tracking.inactiveStep,
-                          },
-                        ]}
-                      />
-                      {i < 3 ? (
-                        <View
-                          style={[
-                            styles.line,
-                            {
-                              backgroundColor:
-                                i < idx
-                                  ? screens.tracking.activeStep
-                                  : screens.tracking.inactiveStep,
-                            },
-                          ]}
-                        />
-                      ) : null}
-                    </View>
-                  );
-                })}
-              </View>
-              <PremiumText variant="caption" color={colors.textSecondary}>
-                {STATUS_LABEL[active.status]} · ${active.total.toFixed(2)}
-              </PremiumText>
-            </AnimatedPressable>
-          </Link>
+        {orders.length > 0 ? (
+          <OrdersSummaryCard
+            totalOrders={orders.length}
+            totalSpent={totalSpent}
+          />
         ) : null}
 
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <EmptyState
-            title="No orders yet"
-            message="When you place an order, it will appear here."
-            actionLabel="Browse restaurants"
-            onAction={() => router.replace('/(tabs)')}
+            title={
+              orders.length === 0 ? 'No orders yet' : 'No orders in this tab'
+            }
+            message={
+              orders.length === 0
+                ? 'When you place an order, it will appear here.'
+                : 'Try another filter to see your orders.'
+            }
+            actionLabel={orders.length === 0 ? 'Browse restaurants' : undefined}
+            onAction={
+              orders.length === 0 ? () => router.replace('/(tabs)') : undefined
+            }
           />
         ) : (
-          <View style={styles.history}>
-            <PremiumText variant="h3">Past orders</PremiumText>
-            {orders.map((order, i) => (
-              <Link key={order.id} href={`/order/${order.id}`} asChild>
-                <AnimatedPressable
-                  entering={FadeInDown.delay(i * 60).duration(350)}
-                  style={styles.orderRow}
-                >
-                  <Image
-                    source={{
-                      uri: order.restaurantLogo || order.items[0]?.item.image,
-                    }}
-                    style={styles.thumb}
-                  />
-                  <View style={styles.orderMeta}>
-                    <PremiumText variant="bodyMedium">
-                      {order.restaurantName}
-                    </PremiumText>
-                    <PremiumText variant="caption" color={colors.textSecondary}>
-                      {new Date(order.createdAt).toLocaleDateString()} ·{' '}
-                      {order.items.length} items
-                    </PremiumText>
-                  </View>
-                  <PremiumText variant="bodyMedium">
-                    ${order.total.toFixed(2)}
-                  </PremiumText>
-                </AnimatedPressable>
-              </Link>
+          <View style={styles.list}>
+            {filteredOrders.map((order) => (
+              <OrderListCard key={order.id} order={order} />
             ))}
           </View>
         )}
@@ -152,63 +188,91 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.backgroundElevated,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
-  content: {
-    padding: spacing.lg,
+  headerTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    lineHeight: 20,
+    color: colors.textPrimary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  cartBadgeText: {
+    fontFamily: fonts.bold,
+    fontSize: 9,
+    lineHeight: 11,
+    color: colors.textInverse,
+  },
+  tabsScroll: {
+    flexGrow: 0,
+    backgroundColor: colors.backgroundElevated,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  tabsContent: {
+    paddingHorizontal: spacing.md,
     gap: spacing.lg,
   },
-  activeCard: {
-    backgroundColor: colors.backgroundElevated,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    borderCurve: 'continuous',
-    ...shadows.card,
-  },
-  progress: {
-    flexDirection: 'row',
+  tab: {
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
     alignItems: 'center',
-    marginVertical: spacing.sm,
+    gap: 6,
   },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tabLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textSecondary,
+  },
+  tabLabelActive: {
+    fontFamily: fonts.semibold,
+    color: colors.primary,
+  },
+  tabIndicator: {
+    width: '100%',
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.primary,
+  },
+  screen: {
     flex: 1,
   },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: radius.full,
-  },
-  line: {
-    flex: 1,
-    height: 3,
-    marginHorizontal: 4,
-    borderRadius: 2,
-  },
-  history: {
+  content: {
+    padding: spacing.md,
     gap: spacing.md,
   },
-  orderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  list: {
     gap: spacing.sm,
-    backgroundColor: colors.backgroundElevated,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderCurve: 'continuous',
-    ...shadows.soft,
-  },
-  thumb: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.sm,
-  },
-  orderMeta: {
-    flex: 1,
-    gap: 2,
   },
 });

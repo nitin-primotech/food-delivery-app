@@ -10,7 +10,7 @@ import { AppSymbol } from '@/shared/components/app-symbol';
 import { QuantityStepper } from '@/shared/components/quantity-stepper';
 import { hapticPrimaryAction, hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { radius } from '@/theme/spacing';
 
 type AnimatedCartActionProps = {
   quantity: number;

@@ -1,9 +1,7 @@
 import { OrderTrackingScreen } from '@/features/orders/components/order-tracking-screen';
 
 export const options = {
-  title: 'Track order',
-  headerBackTitle: 'Back',
-  headerBackButtonDisplayMode: 'minimal' as const,
+  headerShown: false,
 };
 
 export default function OrderTrackingRoute() {

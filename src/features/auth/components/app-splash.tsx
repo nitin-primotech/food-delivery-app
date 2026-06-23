@@ -6,7 +6,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { PremiumText } from '@/shared/components/premium-text';
 import { colors, gradients } from '@/theme/colors';
-import { radius, spacing } from '@/theme/spacing';
+import { spacing } from '@/theme/spacing';
 
 type AppSplashProps = {
   /** Hide after hydration; max 2.5s either way */

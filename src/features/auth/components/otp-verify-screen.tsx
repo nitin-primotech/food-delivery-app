@@ -12,10 +12,14 @@ import {
 } from 'react-native';
 import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import type { OtpDigitStatus } from '@/features/auth/components/verification-code/animated-code-number';
 import { useAnimatedShake } from '@/features/auth/components/verification-code/use-animated-shake';
 import { VerificationCode } from '@/features/auth/components/verification-code/verification-code';
-import { verifyOtpAndCreateSession } from '@/features/auth/services/auth.service';
+import {
+  TOKEN_TTL_MS,
+  verifyOtpAndCreateSession,
+} from '@/features/auth/services/auth.service';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
@@ -29,6 +33,10 @@ import { spacing } from '@/theme/spacing';
 
 const OTP_LENGTH = 4;
 const CORRECT_OTP = 1234;
+const SESSION_TTL_LABEL =
+  TOKEN_TTL_MS >= 60 * 60 * 1000
+    ? `${TOKEN_TTL_MS / (60 * 60 * 1000)} hours`
+    : `${TOKEN_TTL_MS / (60 * 1000)} minutes`;
 
 export function OtpVerifyScreen() {
   const router = useRouter();
@@ -178,7 +186,7 @@ export function OtpVerifyScreen() {
               color={colors.textTertiary}
               style={styles.hint}
             >
-              Session stays active for 10 minutes after login.
+              Session stays active for {SESSION_TTL_LABEL} after login.
             </PremiumText>
             <PremiumButton
               label={isLoading ? 'Verifying…' : 'Verify & continue'}

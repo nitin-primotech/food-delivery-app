@@ -1,14 +1,19 @@
 import { Image } from 'expo-image';
 import { usePathname, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { CartItem } from '@/features/catalog/types/catalog.types';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { CartLineStepper } from '@/shared/components/cart-line-stepper';
-import { PremiumButton } from '@/shared/components/premium-button';
-import { PremiumText } from '@/shared/components/premium-text';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import {
   closeCartSheet,
@@ -22,6 +27,7 @@ import {
 } from '@/store/cart.store';
 import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
+import { fonts } from '@/theme/typography';
 
 type RestaurantGroup = {
   restaurantId: string;
@@ -68,21 +74,15 @@ function CartLineRow({
       />
       <View style={styles.lineMain}>
         <View style={styles.lineTop}>
-          <PremiumText
-            variant="bodyMedium"
-            numberOfLines={2}
-            style={styles.lineName}
-          >
+          <Text style={styles.lineName} numberOfLines={2}>
             {line.item.name}
-          </PremiumText>
-          <PremiumText variant="bodyMedium" color={colors.textPrimary}>
-            {formatPrice(lineTotal)}
-          </PremiumText>
+          </Text>
+          <Text style={styles.linePrice}>{formatPrice(lineTotal)}</Text>
         </View>
         <View style={styles.lineBottom}>
-          <PremiumText variant="caption" color={colors.textTertiary}>
+          <Text style={styles.lineEach}>
             {formatPrice(line.item.price)} each
-          </PremiumText>
+          </Text>
           <CartLineStepper
             quantity={line.quantity}
             onDecrease={() =>
@@ -145,15 +145,15 @@ export function CartBottomSheet() {
 
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <PremiumText variant="h3">Your cart</PremiumText>
-              <PremiumText variant="caption" color={colors.textSecondary}>
+              <Text style={styles.title}>Your cart</Text>
+              <Text style={styles.subtitle}>
                 {itemCount === 1 ? '1 item' : `${itemCount} items`}
                 {groups.length > 1
                   ? ` · ${groups.length} restaurants`
                   : groups[0]
                     ? ` · ${groups[0].restaurantName}`
                     : ''}
-              </PremiumText>
+              </Text>
             </View>
             <Pressable
               onPress={handleClose}
@@ -164,7 +164,7 @@ export function CartBottomSheet() {
             >
               <AppSymbol
                 name="xmark.circle.fill"
-                size={22}
+                size={20}
                 tintColor={colors.textTertiary}
               />
             </Pressable>
@@ -172,10 +172,10 @@ export function CartBottomSheet() {
 
           {savings > 0 ? (
             <View style={styles.savingsPill}>
-              <AppSymbol name="sparkles" size={14} tintColor={colors.success} />
-              <PremiumText variant="captionMedium" color={colors.success}>
+              <AppSymbol name="sparkles" size={12} tintColor={colors.success} />
+              <Text style={styles.savingsText}>
                 You save {formatPrice(savings)} on this order
-              </PremiumText>
+              </Text>
             </View>
           ) : null}
 
@@ -190,15 +190,12 @@ export function CartBottomSheet() {
                   <View style={styles.groupHeader}>
                     <AppSymbol
                       name="fork.knife"
-                      size={14}
+                      size={12}
                       tintColor={colors.primary}
                     />
-                    <PremiumText
-                      variant="captionMedium"
-                      color={colors.textPrimary}
-                    >
+                    <Text style={styles.groupTitle}>
                       {group.restaurantName}
-                    </PremiumText>
+                    </Text>
                   </View>
                 ) : null}
                 {group.lines.map((line, lineIndex) => (
@@ -218,38 +215,34 @@ export function CartBottomSheet() {
               style={styles.addMore}
               accessibilityRole="button"
             >
-              <AppSymbol name="plus" size={14} tintColor={colors.primary} />
-              <PremiumText variant="captionMedium" color={colors.primary}>
-                Add more items
-              </PremiumText>
+              <AppSymbol name="plus" size={12} tintColor={colors.primary} />
+              <Text style={styles.addMoreText}>Add more items</Text>
             </Pressable>
           </ScrollView>
 
           <View style={styles.footer}>
             <View style={styles.summaryRow}>
-              <PremiumText variant="body" color={colors.textSecondary}>
-                Subtotal
-              </PremiumText>
-              <PremiumText variant="bodyMedium">
-                {formatPrice(subtotal)}
-              </PremiumText>
+              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryValue}>{formatPrice(subtotal)}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <PremiumText variant="caption" color={colors.textTertiary}>
-                Delivery fee
-              </PremiumText>
-              <PremiumText variant="captionMedium" color={colors.success}>
-                Free
-              </PremiumText>
+              <Text style={styles.summaryMuted}>Delivery fee</Text>
+              <Text style={styles.summaryFree}>Free</Text>
             </View>
             <View style={styles.totalRow}>
-              <PremiumText variant="bodyMedium">Total</PremiumText>
-              <PremiumText variant="price">{formatPrice(subtotal)}</PremiumText>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalValue}>{formatPrice(subtotal)}</Text>
             </View>
-            <PremiumButton
-              label={`Checkout · ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
+            <Pressable
+              style={styles.checkoutBtn}
               onPress={goCheckout}
-            />
+              accessibilityRole="button"
+              accessibilityLabel="Checkout"
+            >
+              <Text style={styles.checkoutLabel}>
+                Checkout · {itemCount} {itemCount === 1 ? 'item' : 'items'}
+              </Text>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -271,7 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundElevated,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     borderCurve: 'continuous',
   },
   handle: {
@@ -281,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     alignSelf: 'center',
     marginTop: spacing.sm,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   header: {
     flexDirection: 'row',
@@ -294,9 +287,21 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingRight: spacing.md,
   },
+  title: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    lineHeight: 20,
+    color: colors.textPrimary,
+  },
+  subtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textSecondary,
+  },
   closeBtn: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: radius.full,
     backgroundColor: colors.backgroundMuted,
     alignItems: 'center',
@@ -307,11 +312,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     backgroundColor: colors.successLight,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginBottom: spacing.md,
+    borderRadius: 10,
     borderCurve: 'continuous',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    marginBottom: spacing.sm,
+  },
+  savingsText: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.success,
   },
   list: {
     flexGrow: 0,
@@ -327,29 +338,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     paddingTop: spacing.xxs,
+  },
+  groupTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textPrimary,
   },
   groupDivider: {
     height: 1,
     backgroundColor: colors.divider,
-    marginVertical: spacing.md,
+    marginVertical: spacing.sm,
   },
   line: {
     flexDirection: 'row',
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   thumb: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.backgroundMuted,
+    width: 48,
+    height: 48,
+    borderRadius: 10,
     borderCurve: 'continuous',
+    backgroundColor: colors.backgroundMuted,
   },
   lineMain: {
     flex: 1,
-    gap: spacing.xs,
+    gap: 4,
   },
   lineTop: {
     flexDirection: 'row',
@@ -359,27 +376,49 @@ const styles = StyleSheet.create({
   },
   lineName: {
     flex: 1,
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textPrimary,
+  },
+  linePrice: {
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textPrimary,
   },
   lineBottom: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  lineEach: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textTertiary,
+  },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.divider,
-    marginLeft: 52 + spacing.sm,
+    marginLeft: 48 + spacing.sm,
   },
   addMore: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     marginTop: spacing.xs,
   },
+  addMoreText: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.primary,
+  },
   footer: {
-    gap: spacing.sm,
-    paddingTop: spacing.md,
+    gap: 6,
+    paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.divider,
   },
@@ -388,10 +427,62 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  summaryLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textSecondary,
+  },
+  summaryValue: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textPrimary,
+  },
+  summaryMuted: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.textTertiary,
+  },
+  summaryFree: {
+    fontFamily: fonts.semibold,
+    fontSize: 11,
+    lineHeight: 14,
+    color: colors.success,
+  },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: spacing.xs,
+    paddingTop: 2,
+  },
+  totalLabel: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    lineHeight: 18,
+    color: colors.textPrimary,
+  },
+  totalValue: {
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    lineHeight: 18,
+    color: colors.textPrimary,
+  },
+  checkoutBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+  },
+  checkoutLabel: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    lineHeight: 17,
+    color: colors.textInverse,
   },
 });
