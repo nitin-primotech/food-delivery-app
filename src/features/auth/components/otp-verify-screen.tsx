@@ -45,6 +45,7 @@ import { radius, spacing } from '@/theme/spacing';
 const OTP_LENGTH = 4;
 const CORRECT_OTP = '1234';
 const RESEND_SECONDS = 49;
+const DEFAULT_COUNTRY_DIAL_CODE = '+91';
 
 function formatCountdown(seconds: number) {
   const mins = Math.floor(seconds / 60);
@@ -57,7 +58,10 @@ function formatCountdown(seconds: number) {
 export function OtpVerifyScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { phone } = useLocalSearchParams<{ phone: string }>();
+  const { phone, dialCode = DEFAULT_COUNTRY_DIAL_CODE } = useLocalSearchParams<{
+    phone: string;
+    dialCode?: string;
+  }>();
   const [code, setCode] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -68,9 +72,10 @@ export function OtpVerifyScreen() {
   const { shake, rShakeStyle } = useAnimatedShake();
 
   const phonePreview = phone?.replace(/\D/g, '') ?? '';
+  const dialCodeDisplay = dialCode.startsWith('+') ? dialCode : `+${dialCode}`;
   const maskedPhone = phonePreview
-    ? `+91 ${phonePreview.slice(0, 5)} ${phonePreview.slice(-5)}`
-    : '+91';
+    ? `${dialCodeDisplay} ${phonePreview.slice(0, 5)} ${phonePreview.slice(-5)}`
+    : dialCodeDisplay;
 
   useEffect(() => {
     if (resendSeconds <= 0) return;

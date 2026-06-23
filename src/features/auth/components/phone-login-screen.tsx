@@ -1,30 +1,61 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   Keyboard,
-  KeyboardAvoidingView,
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
+import {
+  type CountryItem,
+  CountryPicker,
+  countryCodes,
+} from 'react-native-country-codes-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { requestOtp } from '@/features/auth/services/auth.service';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
-import {
-  formTextInputProps,
-  keyboardAvoidingBehavior,
-} from '@/shared/utils/keyboard';
-import { colors, shadows } from '@/theme/colors';
+import { hapticPressIn, hapticPrimaryAction } from '@/shared/haptics/feedback';
+import { formTextInputProps } from '@/shared/utils/keyboard';
+import { colors, gradients, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
+
+const DEFAULT_COUNTRY_DIAL_CODE = '+91';
+const DEFAULT_COUNTRY: CountryItem = countryCodes.find(
+  (country) => country.code === 'IN',
+) ?? {
+  name: { en: 'India' },
+  dial_code: DEFAULT_COUNTRY_DIAL_CODE,
+  code: 'IN',
+  flag: '🇮🇳',
+};
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function getPhoneDigitLimit(dialCode: string) {
+  return dialCode === DEFAULT_COUNTRY_DIAL_CODE ? 10 : 15;
+}
+
+function isValidPhone(digits: string, dialCode: string) {
+  if (dialCode === DEFAULT_COUNTRY_DIAL_CODE) {
+    return digits.length === 10;
+  }
+  return digits.length >= 6 && digits.length <= 15;
+}
 
 export function PhoneLoginScreen() {
   const router = useRouter();
@@ -32,10 +63,18 @@ export function PhoneLoginScreen() {
   const inputRef = useRef<TextInput>(null);
   const { width, height } = useWindowDimensions();
   const isCompact = height < 820;
-  const artSize = Math.min(width * (isCompact ? 0.68 : 0.78), 360);
+  const artSize = Math.min(width * 0.78, 340);
+  const [selectedCountry, setSelectedCountry] =
+    useState<CountryItem>(DEFAULT_COUNTRY);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const buttonScale = useSharedValue(1);
+  const buttonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }],
+  }));
+  const phoneDigitLimit = getPhoneDigitLimit(selectedCountry.dial_code);
 
   async function handleContinue() {
     setError(null);
@@ -45,7 +84,10 @@ export function PhoneLoginScreen() {
       Keyboard.dismiss();
       router.push({
         pathname: '/(auth)/verify',
-        params: { phone: phone.replace(/\D/g, '') },
+        params: {
+          phone: phone.replace(/\D/g, ''),
+          dialCode: selectedCountry.dial_code,
+        },
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -60,198 +102,282 @@ export function PhoneLoginScreen() {
     inputRef.current?.focus();
   }
 
+  function openCountryPicker() {
+    Keyboard.dismiss();
+    setShowCountryPicker(true);
+  }
+
+  function handleCountrySelect(item: CountryItem) {
+    setSelectedCountry(item);
+    setShowCountryPicker(false);
+    setPhone('');
+    setError(null);
+  }
+
+  function handlePressIn() {
+    if (!canContinue) return;
+    hapticPressIn();
+    buttonScale.value = withSpring(0.98, { damping: 18, stiffness: 420 });
+  }
+
+  function handlePressOut() {
+    buttonScale.value = withSpring(1, { damping: 16, stiffness: 320 });
+  }
+
+  function handlePress() {
+    if (!canContinue) return;
+    hapticPrimaryAction();
+    handleContinue();
+  }
+
   const digits = phone.replace(/\D/g, '');
-  const canContinue = digits.length >= 10 && !isLoading;
+  const canContinue =
+    isValidPhone(digits, selectedCountry.dial_code) && !isLoading;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={keyboardAvoidingBehavior}
-    >
+    <View style={styles.root}>
       <AppStatusBar style="dark" />
 
       <View style={styles.backdrop}>
         <View style={styles.topGlow} />
         <View style={styles.rightGlow} />
-        <View style={styles.leafGlow} />
       </View>
-
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="never"
-        bounces={false}
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingTop: insets.top + spacing.md,
-            paddingBottom: insets.bottom + spacing.lg,
-          },
-        ]}
+      <KeyboardAwareScrollView
+        bottomOffset={60}
+        extraKeyboardSpace={40}
+        automaticallyAdjustKeyboardInsets
+        automaticallyAdjustContentInsets
+        style={{ flex: 1 }}
       >
-        <View style={styles.page}>
-          <View style={styles.heroRow}>
-            <View style={styles.heroCopy}>
-              <View style={styles.brandRow}>
-                <View style={styles.brandIcon} accessibilityElementsHidden>
-                  <View style={styles.brandKnob} />
-                  <View style={styles.brandDome} />
-                  <View style={styles.brandLineOne} />
-                  <View style={styles.brandLineTwo} />
-                  <View style={styles.brandLineThree} />
-                </View>
-                <View>
-                  <View style={styles.wordmarkRow}>
-                    <PremiumText variant="h1" style={styles.wordmarkDark}>
-                      Food
-                    </PremiumText>
-                    <PremiumText
-                      variant="h1"
-                      color={colors.primary}
-                      style={styles.wordmarkAccent}
-                    >
-                      Rush
-                    </PremiumText>
-                  </View>
-                  <PremiumText variant="body" color={colors.textSecondary}>
-                    Delicious food, delivered fast
-                  </PremiumText>
-                </View>
-              </View>
-
-              <View style={styles.copyBlock}>
-                <PremiumText variant="display" style={styles.heroTitle}>
-                  Welcome back!
-                </PremiumText>
-                <PremiumText
-                  variant="body"
-                  color={colors.textSecondary}
-                  style={styles.heroSubtitle}
-                >
-                  Sign in with your phone number to continue
-                </PremiumText>
-              </View>
-            </View>
-
-            <View style={[styles.heroArt, { width: artSize, height: artSize }]}>
-              <View style={styles.heroOrb} />
-              <View style={styles.heroOrbSmall} />
-              <View style={styles.heroRing} />
-              <View
-                style={[styles.heroStack, { width: artSize, height: artSize }]}
-              >
-                <View style={styles.leaf}>
-                  <AppSymbol
-                    name="leaf.fill"
-                    size={isCompact ? 18 : 22}
-                    tintColor="#79B83E"
-                  />
-                </View>
-                <Image
-                  source={require('@/assets/foodimages/a8.png')}
-                  style={[
-                    styles.heroPlate,
-                    { width: artSize, height: artSize },
-                  ]}
-                  contentFit="contain"
-                  transition={180}
-                />
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.formCard}>
-            <PremiumText variant="h3" style={styles.formTitle}>
-              Login with Phone Number
-            </PremiumText>
-            <PremiumText
-              variant="body"
-              color={colors.textSecondary}
-              style={styles.formSubtitle}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="never"
+          bounces={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingTop: insets.top + spacing.xs,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
+        >
+          <View style={styles.page}>
+            <View
+              style={[
+                styles.illustrationWrap,
+                {
+                  width: artSize,
+                  height: artSize * 0.88,
+                  marginTop: isCompact ? spacing.xs : spacing.sm,
+                },
+              ]}
             >
-              We&apos;ll send you a verification code
-            </PremiumText>
+              <Image
+                source={require('@/assets/images/cart.png')}
+                style={styles.illustrationImage}
+                contentFit="contain"
+                transition={180}
+              />
+            </View>
 
-            <View style={styles.inputWrap}>
-              <View style={styles.countrySection}>
-                <TextInput
-                  value="+91"
-                  editable={false}
-                  style={styles.countryCode}
-                />
-                <AppSymbol
-                  name="chevron.down"
-                  size={12}
-                  tintColor={colors.textTertiary}
-                />
-              </View>
-
-              <View style={styles.inputDivider} />
-
-              <View style={styles.inputSection}>
-                <AppSymbol
-                  name="phone.fill"
-                  size={18}
-                  tintColor={colors.textTertiary}
-                />
-                <TextInput
-                  ref={inputRef}
-                  value={phone}
-                  onChangeText={(t) => {
-                    setPhone(t.replace(/\D/g, '').slice(0, 10));
-                    setError(null);
-                  }}
-                  keyboardType="number-pad"
-                  autoComplete="tel"
-                  textContentType="telephoneNumber"
-                  placeholder="Phone number"
-                  placeholderTextColor={colors.textTertiary}
-                  style={styles.input}
-                  maxLength={10}
-                  selectionColor={colors.textPrimary}
-                  blurOnSubmit
-                  {...formTextInputProps}
-                />
-                {phone.length > 0 ? (
-                  <Pressable
-                    onPress={clearPhone}
-                    hitSlop={8}
-                    accessibilityRole="button"
-                    accessibilityLabel="Clear phone number"
+            <View style={styles.headlineBlock}>
+              <PremiumText variant="display" style={styles.headlineSerif}>
+                Good food,
+              </PremiumText>
+              <View style={styles.headlineSecondRow}>
+                <View style={styles.deliveredWrap}>
+                  <PremiumText
+                    color={colors.primary}
+                    style={styles.headlineAccent}
                   >
-                    <AppSymbol
-                      name="xmark.circle.fill"
-                      size={20}
-                      tintColor={colors.textTertiary}
-                    />
-                  </Pressable>
-                ) : null}
+                    delivered
+                  </PremiumText>
+                  <View style={styles.deliveredUnderline} />
+                </View>
+                <PremiumText style={styles.headlineSans}> fast</PremiumText>
               </View>
             </View>
 
-            {error ? (
-              <PremiumText variant="caption" color={colors.danger} selectable>
-                {error}
+            <View style={styles.formSection}>
+              <PremiumText
+                variant="body"
+                color={colors.textSecondary}
+                style={styles.inputLabel}
+              >
+                Enter your mobile number
               </PremiumText>
-            ) : null}
 
-            <PremiumButton
-              label={isLoading ? 'Sending OTP…' : 'Send OTP'}
-              onPress={handleContinue}
-              disabled={!canContinue}
-            />
+              <View style={styles.inputWrap}>
+                <Pressable
+                  onPress={openCountryPicker}
+                  style={styles.countrySection}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Country code ${selectedCountry.name.en} ${selectedCountry.dial_code}`}
+                >
+                  <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
+                  <PremiumText style={styles.countryCode}>
+                    {selectedCountry.dial_code}
+                  </PremiumText>
+                  <AppSymbol
+                    name="chevron.down"
+                    size={12}
+                    tintColor={colors.textTertiary}
+                  />
+                </Pressable>
+
+                <View style={styles.inputDivider} />
+
+                <View style={styles.inputSection}>
+                  <AppSymbol
+                    name="phone.fill"
+                    size={18}
+                    tintColor={colors.textTertiary}
+                  />
+                  <TextInput
+                    ref={inputRef}
+                    value={phone}
+                    onChangeText={(t) => {
+                      setPhone(t.replace(/\D/g, '').slice(0, phoneDigitLimit));
+                      setError(null);
+                    }}
+                    keyboardType="number-pad"
+                    autoComplete="tel"
+                    textContentType="telephoneNumber"
+                    placeholder="Phone number"
+                    placeholderTextColor={colors.textTertiary}
+                    style={styles.input}
+                    maxLength={phoneDigitLimit}
+                    selectionColor={colors.textPrimary}
+                    blurOnSubmit
+                    {...formTextInputProps}
+                  />
+                  {phone.length > 0 ? (
+                    <Pressable
+                      onPress={clearPhone}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Clear phone number"
+                    >
+                      <AppSymbol
+                        name="xmark.circle.fill"
+                        size={20}
+                        tintColor={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
+
+              {error ? (
+                <PremiumText variant="caption" color={colors.danger} selectable>
+                  {error}
+                </PremiumText>
+              ) : null}
+
+              <Animated.View
+                style={[
+                  styles.ctaWrap,
+                  buttonStyle,
+                  !canContinue && styles.ctaWrapDisabled,
+                ]}
+              >
+                <AnimatedPressable
+                  onPress={handlePress}
+                  onPressIn={handlePressIn}
+                  onPressOut={handlePressOut}
+                  disabled={!canContinue}
+                  accessibilityRole="button"
+                  accessibilityLabel="Send OTP"
+                  accessibilityState={{ disabled: !canContinue }}
+                  style={styles.ctaButton}
+                >
+                  <LinearGradient
+                    colors={gradients.primary.colors}
+                    start={gradients.primary.start}
+                    end={gradients.primary.end}
+                    style={styles.ctaGradient}
+                  >
+                    <View style={styles.ctaSideLeft} />
+                    <PremiumText variant="h3" color={colors.textInverse}>
+                      {isLoading ? 'Sending OTP…' : 'Send OTP'}
+                    </PremiumText>
+                    <View style={styles.ctaSideRight}>
+                      <AppSymbol
+                        name="chevron.right"
+                        size={22}
+                        tintColor={colors.textInverse}
+                      />
+                    </View>
+                  </LinearGradient>
+                </AnimatedPressable>
+              </Animated.View>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+        {/* </KeyboardAvoidingView> */}
+      </KeyboardAwareScrollView>
+
+      <CountryPicker
+        show={showCountryPicker}
+        lang="en"
+        initialState={selectedCountry.dial_code}
+        popularCountries={['IN']}
+        pickerButtonOnPress={handleCountrySelect}
+        onBackdropPress={() => setShowCountryPicker(false)}
+        onRequestClose={() => setShowCountryPicker(false)}
+        inputPlaceholder="Search country"
+        inputPlaceholderTextColor={colors.textTertiary}
+        searchMessage="No country found"
+        style={{
+          modal: {
+            height: '72%',
+            backgroundColor: colors.backgroundElevated,
+          },
+          backdrop: {
+            backgroundColor: colors.overlay,
+          },
+          line: {
+            backgroundColor: colors.divider,
+          },
+          textInput: {
+            fontFamily: fonts.medium,
+            color: colors.textPrimary,
+            backgroundColor: colors.backgroundMuted,
+            borderRadius: radius.sm,
+            paddingHorizontal: spacing.md,
+          },
+          countryButtonStyles: {
+            backgroundColor: colors.backgroundElevated,
+            borderBottomColor: colors.divider,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+          },
+          dialCode: {
+            fontFamily: fonts.semibold,
+            color: colors.textPrimary,
+          },
+          countryName: {
+            fontFamily: fonts.regular,
+            color: colors.textSecondary,
+          },
+          searchMessageText: {
+            fontFamily: fonts.regular,
+            color: colors.textSecondary,
+          },
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.backgroundElevated,
+  },
+  flex: {
+    flex: 1,
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
@@ -259,224 +385,110 @@ const styles = StyleSheet.create({
   },
   topGlow: {
     position: 'absolute',
-    left: -40,
-    top: -60,
-    width: 220,
-    height: 220,
-    borderRadius: 220,
-    backgroundColor: colors.backgroundMuted,
-    opacity: 0.7,
-  },
-  rightGlow: {
-    position: 'absolute',
-    right: -90,
-    top: 100,
+    left: -50,
+    top: -40,
     width: 180,
     height: 180,
     borderRadius: 180,
-    backgroundColor: colors.accentMuted,
-    opacity: 0.34,
+    backgroundColor: colors.backgroundMuted,
+    opacity: 0.5,
   },
-  leafGlow: {
+  rightGlow: {
     position: 'absolute',
-    left: 26,
-    top: 170,
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: colors.backgroundElevated,
-    opacity: 0.8,
-    ...shadows.soft,
+    right: -60,
+    top: 140,
+    width: 140,
+    height: 140,
+    borderRadius: 140,
+    backgroundColor: colors.accentMuted,
+    opacity: 0.28,
   },
   scrollContent: {
     flexGrow: 1,
   },
   page: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.lg + 4,
   },
-  heroRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  heroCopy: {
-    flexGrow: 1,
-    gap: spacing.xl,
-    paddingTop: spacing.xs,
-  },
-  brandRow: {
-    flexDirection: 'row',
+  illustrationWrap: {
+    alignSelf: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.sm,
   },
-  brandIcon: {
-    width: 50,
-    height: 36,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 2,
+  illustrationImage: {
+    width: 460,
+    height: 460,
   },
-  brandKnob: {
-    position: 'absolute',
-    top: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.background,
+  headlineBlock: {
+    alignSelf: 'stretch',
+    marginTop: spacing.md,
+    gap: 2,
   },
-  brandDome: {
-    width: 34,
-    height: 18,
-    borderTopLeftRadius: 34,
-    borderTopRightRadius: 34,
-    borderWidth: 2,
-    borderBottomWidth: 0,
-    borderColor: colors.primary,
-    borderCurve: 'continuous',
+  headlineSerif: {
+    fontSize: 30,
+    lineHeight: 36,
   },
-  brandLineOne: {
-    position: 'absolute',
-    left: 0,
-    bottom: 12,
-    width: 34,
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  brandLineTwo: {
-    position: 'absolute',
-    left: 8,
-    bottom: 7,
-    width: 14,
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  brandLineThree: {
-    position: 'absolute',
-    left: 0,
-    bottom: 1,
-    width: 26,
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  wordmarkRow: {
+  headlineSecondRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    flexWrap: 'wrap',
   },
-  wordmarkDark: {
+  headlineAccent: {
+    fontFamily: fonts.bold,
     fontSize: 30,
+    lineHeight: 36,
   },
-  wordmarkAccent: {
+  headlineSans: {
+    fontFamily: fonts.bold,
     fontSize: 30,
+    lineHeight: 36,
+    color: colors.textPrimary,
   },
-  copyBlock: {
-    gap: spacing.sm,
-  },
-  heroTitle: {
-    fontSize: 28,
-    lineHeight: 34,
-    // maxWidth: 160,
-  },
-  heroSubtitle: {
-    maxWidth: 180,
-    lineHeight: 24,
-  },
-  heroArt: {
-    position: 'absolute',
-    zIndex: -1,
-    justifyContent: 'flex-start',
+  deliveredWrap: {
     alignItems: 'center',
-    marginTop: spacing.sm,
-    left: 120,
-    top: 50,
   },
-  heroOrb: {
-    position: 'absolute',
-    right: -10,
-    top: 28,
-    width: 96,
-    height: 96,
-    borderRadius: 96,
-    backgroundColor: colors.accentMuted,
-    opacity: 0.44,
+  deliveredUnderline: {
+    marginTop: 6,
+    width: 64,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
   },
-  heroOrbSmall: {
-    position: 'absolute',
-    left: 22,
-    bottom: 10,
-    width: 72,
-    height: 72,
-    borderRadius: 72,
-    backgroundColor: colors.backgroundMuted,
-    opacity: 0.6,
+  formSection: {
+    marginTop: spacing.lg,
+    gap: spacing.md,
   },
-  heroRing: {
-    position: 'absolute',
-    left: 0,
-    top: 132,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: 'rgba(212,84,60,0.18)',
-  },
-  heroStack: {
-    position: 'relative',
-  },
-  heroPlate: {
-    position: 'absolute',
-    right: -4,
-    top: 10,
-  },
-  leaf: {
-    position: 'absolute',
-    right: 22,
-    top: 20,
-    zIndex: 2,
-    transform: [{ rotate: '-16deg' }],
-  },
-  formCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    gap: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    borderCurve: 'continuous',
-    ...shadows.card,
-  },
-  formTitle: {
-    lineHeight: 28,
-  },
-  formSubtitle: {
-    marginTop: -spacing.xs,
+  inputLabel: {
+    fontSize: 15,
+    lineHeight: 20,
   },
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 60,
-    borderRadius: radius.md,
+    minHeight: 56,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.backgroundElevated,
     overflow: 'hidden',
     borderCurve: 'continuous',
+    ...shadows.soft,
   },
   countrySection: {
     paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xs,
+    minHeight: 56,
+  },
+  countryFlag: {
+    fontSize: 20,
+    lineHeight: 24,
   },
   countryCode: {
     fontFamily: fonts.semibold,
     color: colors.textPrimary,
-    width: 34,
+    fontSize: 16,
   },
   inputDivider: {
     width: StyleSheet.hairlineWidth,
@@ -498,11 +510,31 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     paddingVertical: 0,
   },
-  bottomLink: {
+  ctaWrap: {
+    marginTop: spacing.xs,
+    borderRadius: 18,
+    overflow: 'hidden',
+    ...shadows.float,
+  },
+  ctaWrapDisabled: {
+    opacity: 0.55,
+  },
+  ctaButton: {
+    width: '100%',
+  },
+  ctaGradient: {
+    minHeight: 56,
+    borderRadius: 18,
+    paddingHorizontal: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingTop: spacing.xl,
+    borderCurve: 'continuous',
+  },
+  ctaSideLeft: {
+    flex: 1,
+  },
+  ctaSideRight: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
 });
