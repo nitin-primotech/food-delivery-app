@@ -17,10 +17,9 @@ import type { LocationSuggestion } from '@/features/auth/types/location.types';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumText } from '@/shared/components/premium-text';
-import { ScreenBackButton } from '@/shared/components/screen-back-button';
 import { formTextInputProps } from '@/shared/utils/keyboard';
 import { setDeliveryAddressFromSuggestion } from '@/store/app.store';
-import { colors } from '@/theme/colors';
+import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts, typography } from '@/theme/typography';
 
@@ -70,7 +69,21 @@ export function LocationSearchScreen({
       <AppStatusBar style="dark" />
       <View style={[styles.content, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
-          <ScreenBackButton onPress={handleBack} />
+          {/* <ScreenBackButton onPress={handleBack} />
+           */}
+          {/* <Pressable
+            onPress={handleBack}
+            style={styles.backButton}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <AppSymbol
+              name="chevron.left"
+              size={22}
+              tintColor={colors.textPrimary}
+            />
+          </Pressable> */}
           <PremiumText variant="h2" style={styles.title}>
             {isOnboarding
               ? 'Enter your area or apartment name'
@@ -214,6 +227,16 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.backgroundElevated,
+    ...shadows.soft,
   },
   header: {
     gap: spacing.md,

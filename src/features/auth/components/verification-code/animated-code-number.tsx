@@ -31,17 +31,19 @@ export function AnimatedCodeNumber({
   const getColorByStatus = useCallback(
     (vStatus: OtpDigitStatus) => {
       'worklet';
-      if (highlighted) return '#D4543C';
-      if (vStatus === 'correct') return '#2D6A4F';
-      if (vStatus === 'wrong') return '#DC2626';
-      return '#E8E4DE';
+      if (highlighted) return colors.primary;
+      if (vStatus === 'correct') return colors.success;
+      if (vStatus === 'wrong') return colors.danger;
+      return colors.border;
     },
     [highlighted],
   );
 
   const rBoxStyle = useAnimatedStyle(() => ({
     borderColor: withTiming(getColorByStatus(status.value)),
-    backgroundColor: withTiming(highlighted ? '#FFFFFF' : '#F0EBE4'),
+    backgroundColor: withTiming(
+      highlighted ? colors.backgroundElevated : colors.backgroundMuted,
+    ),
   }));
 
   return (
@@ -73,10 +75,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderCurve: 'continuous',
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
-    height: 64,
-    width: 56,
+    height: 70,
+    width: 68,
   },
   text: {
     ...typography.h2,

@@ -5,7 +5,7 @@ import {
   AnimatedCodeNumber,
   type OtpDigitStatus,
 } from '@/features/auth/components/verification-code/animated-code-number';
-import { spacing } from '@/theme/spacing';
+import { spacing } from '@/theme';
 
 type VerificationCodeProps = {
   code: number[];

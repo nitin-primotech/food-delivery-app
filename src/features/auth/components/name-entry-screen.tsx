@@ -1,5 +1,3 @@
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -18,7 +16,7 @@ import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
 import { keyboardAvoidingBehavior } from '@/shared/utils/keyboard';
 import { setUserName } from '@/store/app.store';
-import { colors, gradients } from '@/theme/colors';
+import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts, typography } from '@/theme/typography';
 
@@ -35,122 +33,191 @@ export function NameEntryScreen() {
     router.replace('/location?onboarding=1' as Href);
   }
 
+  function handleBack() {
+    router.back();
+  }
+
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={gradients.primary.colors}
-        style={StyleSheet.flatten([
-          styles.hero,
-          { paddingTop: insets.top + spacing.lg },
-        ])}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.back}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <AppSymbol
-            name="chevron.left"
-            size={22}
-            tintColor={colors.textInverse}
-          />
-        </Pressable>
-        <View style={styles.heroLogo}>
-          <View style={styles.logoMark}>
-            <Image
-              source={require('@/assets/images/foodrushlogo.png')}
-              style={styles.logoImage}
-              contentFit="contain"
-            />
-          </View>
-        </View>
-        <PremiumText
-          variant="bodyMedium"
-          color={colors.textInverse}
-          style={styles.heroText}
-        >
-          One app for food, grocery, dining & more in minutes!
-        </PremiumText>
-        <View style={styles.heroImages}>
-          <Image
-            source="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80"
-            style={styles.heroThumb}
-            contentFit="cover"
-          />
-          <Image
-            source="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"
-            style={StyleSheet.flatten([
-              styles.heroThumb,
-              styles.heroThumbCenter,
-            ])}
-            contentFit="cover"
-          />
-          <Image
-            source="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"
-            style={styles.heroThumb}
-            contentFit="cover"
-          />
-        </View>
-      </LinearGradient>
+      <View style={styles.backdrop}>
+        <View style={styles.leftGlow} />
+        <View style={styles.rightGlow} />
+        <View style={styles.centerGlow} />
+      </View>
 
       <KeyboardAvoidingView
         behavior={keyboardAvoidingBehavior}
-        style={styles.sheetContainer}
+        style={styles.flex}
         keyboardVerticalOffset={0}
       >
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={StyleSheet.flatten([
-            styles.sheet,
-            { paddingBottom: insets.bottom + spacing.lg },
-          ])}
+          contentInsetAdjustmentBehavior="never"
+          bounces={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingTop: insets.top + spacing.sm,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
         >
-          <PremiumText variant="h2" style={styles.title}>
-            What&apos;s your name?
-          </PremiumText>
-
-          <View style={styles.inputWrap}>
-            <PremiumText
-              variant="label"
-              color={colors.primary}
-              style={styles.floatingLabel}
+          <View style={styles.page}>
+            {/* <Pressable
+              onPress={handleBack}
+              style={styles.backButton}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
             >
-              Enter Full Name
-            </PremiumText>
-            <View style={styles.inputRow}>
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                placeholder="Sam Lee"
-                placeholderTextColor={colors.textTertiary}
-                style={styles.input}
-                autoCapitalize="words"
-                autoCorrect={false}
-                textContentType="name"
-                autoComplete="name"
-                returnKeyType="done"
-                onSubmitEditing={() => Keyboard.dismiss()}
+              <AppSymbol
+                name="chevron.left"
+                size={22}
+                tintColor={colors.textPrimary}
               />
-              {name.length > 0 ? (
-                <Pressable onPress={() => setName('')} hitSlop={8}>
+            </Pressable> */}
+
+            <View style={styles.hero}>
+              <View style={styles.brandRow}>
+                <View style={styles.brandIcon} accessibilityElementsHidden>
+                  <View style={styles.brandKnob} />
+                  <View style={styles.brandDome} />
+                  <View style={styles.brandLineOne} />
+                  <View style={styles.brandLineTwo} />
+                  <View style={styles.brandLineThree} />
+                </View>
+              </View>
+
+              <View style={styles.heroBody}>
+                <View style={styles.copyBlock}>
+                  <PremiumText variant="display" style={styles.title}>
+                    What&apos;s your
+                  </PremiumText>
+                  <PremiumText
+                    variant="display"
+                    color={colors.primary}
+                    style={styles.titleAccent}
+                  >
+                    full name?
+                  </PremiumText>
+                  <PremiumText
+                    variant="body"
+                    color={colors.textSecondary}
+                    style={styles.subtitle}
+                  >
+                    This helps us personalize your experience
+                  </PremiumText>
+                </View>
+
+                <View style={styles.heroArt}>
+                  <View style={styles.heroDotGrid}>
+                    {Array.from({ length: 12 }).map((_, index) => (
+                      <View
+                        key={index}
+                        style={[
+                          styles.heroDot,
+                          index % 3 === 2 && styles.heroDotLast,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                  <View style={styles.heroOrb} />
+                  <View style={styles.heroSparkOne} />
+                  <View style={styles.heroSparkTwo} />
+                  <View style={styles.heroCardShadow} />
+                  <View style={styles.heroCard}>
+                    <View style={styles.avatarCircle}>
+                      <AppSymbol
+                        name="person.fill"
+                        size={32}
+                        tintColor={colors.primary}
+                      />
+                    </View>
+                    <View style={styles.cardLines}>
+                      <View style={styles.cardLineLong} />
+                      <View style={styles.cardLineShort} />
+                    </View>
+                  </View>
+                  <View style={styles.heroLeaf}>
+                    <AppSymbol name="leaf.fill" size={20} tintColor="#79B83E" />
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.formSection}>
+              <View style={styles.inputGroup}>
+                <PremiumText variant="bodyMedium" style={styles.inputLabel}>
+                  Full Name
+                </PremiumText>
+                <View style={styles.inputWrap}>
                   <AppSymbol
-                    name="xmark.circle.fill"
-                    size={22}
+                    name="person.fill"
+                    size={18}
                     tintColor={colors.textTertiary}
                   />
-                </Pressable>
-              ) : null}
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Enter your full name"
+                    placeholderTextColor={colors.textTertiary}
+                    style={styles.input}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                    textContentType="name"
+                    autoComplete="name"
+                    returnKeyType="done"
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                  />
+                  {name.length > 0 ? (
+                    <Pressable onPress={() => setName('')} hitSlop={8}>
+                      <AppSymbol
+                        name="xmark.circle.fill"
+                        size={22}
+                        tintColor={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
+
+              <View style={styles.safetyCard}>
+                <View style={styles.safetyIconShell}>
+                  <AppSymbol
+                    name="shield.fill"
+                    size={22}
+                    tintColor={colors.primary}
+                  />
+                </View>
+                <View style={styles.safetyCopy}>
+                  <PremiumText variant="bodyMedium" style={styles.safetyTitle}>
+                    Don&apos;t worry
+                  </PremiumText>
+                  <PremiumText
+                    variant="body"
+                    color={colors.textSecondary}
+                    style={styles.safetyText}
+                  >
+                    Your information is safe with us
+                  </PremiumText>
+                </View>
+                <AppSymbol
+                  name="lock.fill"
+                  size={16}
+                  tintColor={colors.primary}
+                />
+              </View>
+            </View>
+
+            <View style={styles.footer}>
+              <PremiumButton
+                label="Continue"
+                onPress={handleContinue}
+                disabled={!canContinue}
+              />
             </View>
           </View>
-
-          <PremiumButton
-            label="Continue"
-            onPress={handleContinue}
-            disabled={!canContinue}
-          />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -160,90 +227,315 @@ export function NameEntryScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    overflow: 'hidden',
+  },
+  leftGlow: {
+    position: 'absolute',
+    left: -52,
+    top: 118,
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    backgroundColor: '#F5EADD',
+    opacity: 0.56,
+  },
+  rightGlow: {
+    position: 'absolute',
+    right: -72,
+    top: 88,
+    width: 188,
+    height: 188,
+    borderRadius: 94,
+    backgroundColor: '#F5E2C9',
+    opacity: 0.36,
+  },
+  centerGlow: {
+    position: 'absolute',
+    right: 12,
+    top: 296,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#F8EEDF',
+    opacity: 0.66,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  page: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.backgroundElevated,
+    ...shadows.soft,
   },
   hero: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    marginTop: spacing.lg,
   },
-  back: {
-    marginBottom: spacing.md,
-  },
-  heroLogo: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  logoMark: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoImage: {
-    width: 72,
-    height: 72,
-  },
-  heroText: {
-    textAlign: 'center',
+  brandRow: {
     marginBottom: spacing.lg,
   },
-  heroImages: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  brandIcon: {
+    width: 42,
+    height: 30,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: spacing.sm,
+    paddingBottom: 2,
   },
-  heroThumb: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.md,
+  brandKnob: {
+    position: 'absolute',
+    top: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     borderWidth: 2,
-    borderColor: colors.textInverse,
+    borderColor: colors.primary,
+    backgroundColor: colors.background,
   },
-  heroThumbCenter: {
-    width: 88,
-    height: 88,
-  },
-  sheetContainer: {
-    flex: 1,
-    marginTop: -spacing.xxl,
-  },
-  sheet: {
-    flexGrow: 1,
-    backgroundColor: colors.backgroundElevated,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    gap: spacing.xl,
+  brandDome: {
+    width: 30,
+    height: 16,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderColor: colors.primary,
     borderCurve: 'continuous',
   },
+  brandLineOne: {
+    position: 'absolute',
+    left: 0,
+    bottom: 12,
+    width: 32,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  brandLineTwo: {
+    position: 'absolute',
+    left: 8,
+    bottom: 7,
+    width: 12,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  brandLineThree: {
+    position: 'absolute',
+    left: 0,
+    bottom: 1,
+    width: 24,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  heroBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  copyBlock: {
+    flex: 1,
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+  },
   title: {
-    marginTop: spacing.sm,
+    fontSize: 24,
+    lineHeight: 30,
+  },
+  titleAccent: {
+    fontSize: 24,
+    lineHeight: 30,
+  },
+  subtitle: {
+    maxWidth: 230,
+    lineHeight: 24,
+  },
+  heroArt: {
+    width: 210,
+    height: 220,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -spacing.sm,
+  },
+  heroDotGrid: {
+    position: 'absolute',
+    right: 6,
+    top: 20,
+    width: 48,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+  },
+  heroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: '#F0C39A',
+  },
+  heroDotLast: {
+    marginRight: 0,
+  },
+  heroOrb: {
+    position: 'absolute',
+    right: 8,
+    top: 24,
+    width: 108,
+    height: 108,
+    borderRadius: 54,
+    backgroundColor: '#F8EEDF',
+    opacity: 0.9,
+  },
+  heroSparkOne: {
+    position: 'absolute',
+    right: 34,
+    top: 76,
+    width: 16,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    transform: [{ rotate: '-60deg' }],
+  },
+  heroSparkTwo: {
+    position: 'absolute',
+    right: 46,
+    top: 86,
+    width: 14,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    transform: [{ rotate: '18deg' }],
+  },
+  heroCardShadow: {
+    position: 'absolute',
+    right: 0,
+    top: 78,
+    width: 180,
+    height: 128,
+    borderRadius: radius.xl,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    transform: [{ rotate: '7deg' }],
+  },
+  heroCard: {
+    position: 'absolute',
+    right: 2,
+    top: 80,
+    width: 176,
+    height: 124,
+    borderRadius: radius.xl,
+    backgroundColor: colors.backgroundElevated,
+    ...shadows.card,
+    transform: [{ rotate: '7deg' }],
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    gap: spacing.md,
+  },
+  avatarCircle: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9E7D0',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 84, 60, 0.08)',
+  },
+  cardLines: {
+    flex: 1,
+    gap: spacing.sm,
+  },
+  cardLineLong: {
+    width: 76,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: '#E7B16A',
+    opacity: 0.72,
+  },
+  cardLineShort: {
+    width: 60,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: '#E7B16A',
+    opacity: 0.48,
+  },
+  heroLeaf: {
+    position: 'absolute',
+    right: 4,
+    bottom: 22,
+    transform: [{ rotate: '-12deg' }],
+  },
+  formSection: {
+    gap: spacing.lg,
+    marginTop: spacing.xl,
+  },
+  inputGroup: {
+    gap: spacing.md,
+  },
+  inputLabel: {
+    color: colors.textSecondary,
+    fontSize: 16,
   },
   inputWrap: {
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderRadius: radius.md,
-    paddingTop: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  floatingLabel: {
-    position: 'absolute',
-    top: -10,
-    left: spacing.md,
-    backgroundColor: colors.backgroundElevated,
-    paddingHorizontal: spacing.xxs,
-  },
-  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    minHeight: 74,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    backgroundColor: colors.backgroundElevated,
+    paddingHorizontal: spacing.md,
+    ...shadows.soft,
   },
   input: {
     flex: 1,
     ...typography.h3,
     fontFamily: fonts.medium,
     color: colors.textPrimary,
-    // paddingVertical: spacing.xs,
+  },
+  safetyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.xl,
+    backgroundColor: '#FBF2E8',
+  },
+  safetyIconShell: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F7E7D4',
+  },
+  safetyCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  safetyTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  safetyText: {
+    lineHeight: 22,
+  },
+  footer: {
+    marginTop: 'auto',
+    paddingTop: spacing.xl,
   },
 });

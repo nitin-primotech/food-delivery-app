@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -9,19 +8,21 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { requestOtp } from '@/features/auth/services/auth.service';
+import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
 import {
-  keyboardAppearance,
+  formTextInputProps,
   keyboardAvoidingBehavior,
 } from '@/shared/utils/keyboard';
-import { colors, gradients } from '@/theme/colors';
+import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
@@ -29,6 +30,9 @@ export function PhoneLoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const inputRef = useRef<TextInput>(null);
+  const { width, height } = useWindowDimensions();
+  const isCompact = height < 820;
+  const artSize = Math.min(width * (isCompact ? 0.68 : 0.78), 360);
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,169 +68,180 @@ export function PhoneLoginScreen() {
       style={styles.root}
       behavior={keyboardAvoidingBehavior}
     >
+      <AppStatusBar style="dark" />
+
+      <View style={styles.backdrop}>
+        <View style={styles.topGlow} />
+        <View style={styles.rightGlow} />
+        <View style={styles.leafGlow} />
+      </View>
+
       <ScrollView
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentInsetAdjustmentBehavior="never"
+        bounces={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: insets.top + spacing.md,
+            paddingBottom: insets.bottom + spacing.lg,
+          },
+        ]}
       >
-        <LinearGradient
-          colors={gradients.primary.colors}
-          start={gradients.primary.start}
-          end={gradients.primary.end}
-          style={StyleSheet.flatten([
-            styles.hero,
-            { paddingTop: insets.top + spacing.lg },
-          ])}
-        >
-          <Pressable
-            onPress={() => router.back()}
-            style={styles.back}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <AppSymbol
-              name="chevron.left"
-              size={22}
-              tintColor={colors.textInverse}
-            />
-          </Pressable>
-          <View style={styles.heroLogo}>
-            <View style={styles.logoMark}>
-              <Image
-                source={require('@/assets/images/foodrushlogo.png')}
-                style={styles.logoImage}
-                contentFit="contain"
-              />
-            </View>
-          </View>
-          <PremiumText
-            variant="bodyMedium"
-            color={colors.textInverse}
-            style={styles.heroText}
-          >
-            Restaurant food, rushed to your door
-          </PremiumText>
-          <View style={styles.heroImages}>
-            <Image
-              source="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80"
-              style={styles.heroThumb}
-              contentFit="cover"
-            />
-            <Image
-              source="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"
-              style={StyleSheet.flatten([
-                styles.heroThumb,
-                styles.heroThumbCenter,
-              ])}
-              contentFit="cover"
-            />
-            <Image
-              source="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"
-              style={styles.heroThumb}
-              contentFit="cover"
-            />
-          </View>
-        </LinearGradient>
+        <View style={styles.page}>
+          <View style={styles.heroRow}>
+            <View style={styles.heroCopy}>
+              <View style={styles.brandRow}>
+                <View style={styles.brandIcon} accessibilityElementsHidden>
+                  <View style={styles.brandKnob} />
+                  <View style={styles.brandDome} />
+                  <View style={styles.brandLineOne} />
+                  <View style={styles.brandLineTwo} />
+                  <View style={styles.brandLineThree} />
+                </View>
+                <View>
+                  <View style={styles.wordmarkRow}>
+                    <PremiumText variant="h1" style={styles.wordmarkDark}>
+                      Food
+                    </PremiumText>
+                    <PremiumText
+                      variant="h1"
+                      color={colors.primary}
+                      style={styles.wordmarkAccent}
+                    >
+                      Rush
+                    </PremiumText>
+                  </View>
+                  <PremiumText variant="body" color={colors.textSecondary}>
+                    Delicious food, delivered fast
+                  </PremiumText>
+                </View>
+              </View>
 
-        <View style={styles.sheet}>
-          <PremiumText variant="h2" style={styles.title}>
-            Enter your number
-          </PremiumText>
-
-          <View style={styles.inputWrap}>
-            <View style={styles.floatingLabel}>
-              <PremiumText variant="label" color={colors.primary}>
-                Mobile Number
-              </PremiumText>
-            </View>
-            <View style={styles.inputRow}>
-              <View style={styles.country}>
-                <PremiumText variant="bodyMedium">🇮🇳</PremiumText>
-                <PremiumText variant="bodyMedium" style={styles.countryCode}>
-                  +91
+              <View style={styles.copyBlock}>
+                <PremiumText variant="display" style={styles.heroTitle}>
+                  Welcome back!
                 </PremiumText>
+                <PremiumText
+                  variant="body"
+                  color={colors.textSecondary}
+                  style={styles.heroSubtitle}
+                >
+                  Sign in with your phone number to continue
+                </PremiumText>
+              </View>
+            </View>
+
+            <View style={[styles.heroArt, { width: artSize, height: artSize }]}>
+              <View style={styles.heroOrb} />
+              <View style={styles.heroOrbSmall} />
+              <View style={styles.heroRing} />
+              <View
+                style={[styles.heroStack, { width: artSize, height: artSize }]}
+              >
+                <View style={styles.leaf}>
+                  <AppSymbol
+                    name="leaf.fill"
+                    size={isCompact ? 18 : 22}
+                    tintColor="#79B83E"
+                  />
+                </View>
+                <Image
+                  source={require('@/assets/foodimages/a8.png')}
+                  style={[
+                    styles.heroPlate,
+                    { width: artSize, height: artSize },
+                  ]}
+                  contentFit="contain"
+                  transition={180}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.formCard}>
+            <PremiumText variant="h3" style={styles.formTitle}>
+              Login with Phone Number
+            </PremiumText>
+            <PremiumText
+              variant="body"
+              color={colors.textSecondary}
+              style={styles.formSubtitle}
+            >
+              We&apos;ll send you a verification code
+            </PremiumText>
+
+            <View style={styles.inputWrap}>
+              <View style={styles.countrySection}>
+                <TextInput
+                  value="+91"
+                  editable={false}
+                  style={styles.countryCode}
+                />
                 <AppSymbol
                   name="chevron.down"
                   size={12}
-                  tintColor={colors.textSecondary}
+                  tintColor={colors.textTertiary}
                 />
               </View>
+
               <View style={styles.inputDivider} />
-              <TextInput
-                ref={inputRef}
-                value={phone}
-                onChangeText={(t) => {
-                  setPhone(t.replace(/\D/g, '').slice(0, 10));
-                  setError(null);
-                }}
-                keyboardType="number-pad"
-                keyboardAppearance={keyboardAppearance}
-                textContentType="telephoneNumber"
-                autoComplete="tel"
-                placeholder="10-digit mobile"
-                placeholderTextColor={colors.textTertiary}
-                style={styles.input}
-                maxLength={10}
-                selectionColor={colors.textPrimary}
-                blurOnSubmit
-              />
-              {phone.length > 0 ? (
-                <Pressable
-                  onPress={clearPhone}
-                  hitSlop={8}
-                  style={styles.clearBtn}
-                  accessibilityRole="button"
-                  accessibilityLabel="Clear phone number"
-                >
-                  <AppSymbol
-                    name="xmark.circle.fill"
-                    size={20}
-                    tintColor={colors.textTertiary}
-                  />
-                </Pressable>
-              ) : null}
+
+              <View style={styles.inputSection}>
+                <AppSymbol
+                  name="phone.fill"
+                  size={18}
+                  tintColor={colors.textTertiary}
+                />
+                <TextInput
+                  ref={inputRef}
+                  value={phone}
+                  onChangeText={(t) => {
+                    setPhone(t.replace(/\D/g, '').slice(0, 10));
+                    setError(null);
+                  }}
+                  keyboardType="number-pad"
+                  autoComplete="tel"
+                  textContentType="telephoneNumber"
+                  placeholder="Phone number"
+                  placeholderTextColor={colors.textTertiary}
+                  style={styles.input}
+                  maxLength={10}
+                  selectionColor={colors.textPrimary}
+                  blurOnSubmit
+                  {...formTextInputProps}
+                />
+                {phone.length > 0 ? (
+                  <Pressable
+                    onPress={clearPhone}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear phone number"
+                  >
+                    <AppSymbol
+                      name="xmark.circle.fill"
+                      size={20}
+                      tintColor={colors.textTertiary}
+                    />
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
+
+            {error ? (
+              <PremiumText variant="caption" color={colors.danger} selectable>
+                {error}
+              </PremiumText>
+            ) : null}
+
+            <PremiumButton
+              label={isLoading ? 'Sending OTP…' : 'Send OTP'}
+              onPress={handleContinue}
+              disabled={!canContinue}
+            />
           </View>
-
-          {error ? (
-            <PremiumText variant="caption" color={colors.danger} selectable>
-              {error}
-            </PremiumText>
-          ) : null}
-
-          <View style={styles.spacer} />
-
-          <PremiumButton
-            label={isLoading ? 'Sending code…' : 'Continue'}
-            onPress={handleContinue}
-            disabled={!canContinue}
-          />
-
-          <PremiumText
-            variant="caption"
-            color={colors.textSecondary}
-            style={styles.legal}
-          >
-            By continuing, I accept the{' '}
-            <PremiumText
-              variant="captionMedium"
-              color={colors.primary}
-              onPress={() => router.push('/(auth)/terms')}
-            >
-              terms of service
-            </PremiumText>{' '}
-            &{' '}
-            <PremiumText
-              variant="captionMedium"
-              color={colors.primary}
-              onPress={() => router.push('/(auth)/privacy')}
-            >
-              privacy policy
-            </PremiumText>
-            .
-          </PremiumText>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -236,124 +251,258 @@ export function PhoneLoginScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    overflow: 'hidden',
+  },
+  topGlow: {
+    position: 'absolute',
+    left: -40,
+    top: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 220,
+    backgroundColor: colors.backgroundMuted,
+    opacity: 0.7,
+  },
+  rightGlow: {
+    position: 'absolute',
+    right: -90,
+    top: 100,
+    width: 180,
+    height: 180,
+    borderRadius: 180,
+    backgroundColor: colors.accentMuted,
+    opacity: 0.34,
+  },
+  leafGlow: {
+    position: 'absolute',
+    left: 26,
+    top: 170,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: colors.backgroundElevated,
+    opacity: 0.8,
+    ...shadows.soft,
   },
   scrollContent: {
     flexGrow: 1,
   },
-  hero: {
+  page: {
+    flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
-    borderBottomLeftRadius: radius.xl,
-    borderBottomRightRadius: radius.xl,
   },
-  back: {
-    marginBottom: spacing.md,
-  },
-  heroLogo: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  logoMark: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoImage: {
-    width: 72,
-    height: 72,
-  },
-  heroText: {
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.sm,
-  },
-  heroImages: {
+  heroRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  heroCopy: {
+    flexGrow: 1,
+    gap: spacing.xl,
+    paddingTop: spacing.xs,
+  },
+  brandRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  heroThumb: {
+  brandIcon: {
+    width: 50,
+    height: 36,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 2,
+  },
+  brandKnob: {
+    position: 'absolute',
+    top: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    backgroundColor: colors.background,
+  },
+  brandDome: {
+    width: 34,
+    height: 18,
+    borderTopLeftRadius: 34,
+    borderTopRightRadius: 34,
+    borderWidth: 2,
+    borderBottomWidth: 0,
+    borderColor: colors.primary,
+    borderCurve: 'continuous',
+  },
+  brandLineOne: {
+    position: 'absolute',
+    left: 0,
+    bottom: 12,
+    width: 34,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  brandLineTwo: {
+    position: 'absolute',
+    left: 8,
+    bottom: 7,
+    width: 14,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  brandLineThree: {
+    position: 'absolute',
+    left: 0,
+    bottom: 1,
+    width: 26,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  wordmarkDark: {
+    fontSize: 30,
+  },
+  wordmarkAccent: {
+    fontSize: 30,
+  },
+  copyBlock: {
+    gap: spacing.sm,
+  },
+  heroTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    // maxWidth: 160,
+  },
+  heroSubtitle: {
+    maxWidth: 180,
+    lineHeight: 24,
+  },
+  heroArt: {
+    position: 'absolute',
+    zIndex: -1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    left: 120,
+    top: 50,
+  },
+  heroOrb: {
+    position: 'absolute',
+    right: -10,
+    top: 28,
+    width: 96,
+    height: 96,
+    borderRadius: 96,
+    backgroundColor: colors.accentMuted,
+    opacity: 0.44,
+  },
+  heroOrbSmall: {
+    position: 'absolute',
+    left: 22,
+    bottom: 10,
     width: 72,
     height: 72,
-    borderRadius: radius.md,
+    borderRadius: 72,
+    backgroundColor: colors.backgroundMuted,
+    opacity: 0.6,
+  },
+  heroRing: {
+    position: 'absolute',
+    left: 0,
+    top: 132,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 2,
-    borderColor: colors.textInverse,
+    borderColor: 'rgba(212,84,60,0.18)',
   },
-  heroThumbCenter: {
-    width: 88,
-    height: 88,
+  heroStack: {
+    position: 'relative',
   },
-  sheet: {
-    flexGrow: 1,
-    backgroundColor: colors.backgroundElevated,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    marginTop: -spacing.xxl,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xl,
+  heroPlate: {
+    position: 'absolute',
+    right: -4,
+    top: 10,
+  },
+  leaf: {
+    position: 'absolute',
+    right: 22,
+    top: 20,
+    zIndex: 2,
+    transform: [{ rotate: '-16deg' }],
+  },
+  formCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    borderRadius: radius.xl,
+    padding: spacing.xl,
     gap: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.divider,
     borderCurve: 'continuous',
+    ...shadows.card,
   },
-  title: {
-    marginTop: spacing.sm,
+  formTitle: {
+    lineHeight: 28,
+  },
+  formSubtitle: {
+    marginTop: -spacing.xs,
   },
   inputWrap: {
-    borderWidth: 1.5,
-    borderColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 60,
     borderRadius: radius.md,
-    borderCurve: 'continuous',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-    minHeight: 64,
-    justifyContent: 'center',
-  },
-  floatingLabel: {
-    position: 'absolute',
-    top: -11,
-    left: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     backgroundColor: colors.backgroundElevated,
-    paddingHorizontal: spacing.xs,
+    overflow: 'hidden',
+    borderCurve: 'continuous',
   },
-  inputRow: {
+  countrySection: {
+    paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 32,
-  },
-  country: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xxs,
-    paddingRight: spacing.sm,
   },
   countryCode: {
     fontFamily: fonts.semibold,
+    color: colors.textPrimary,
+    width: 34,
   },
   inputDivider: {
     width: StyleSheet.hairlineWidth,
     alignSelf: 'stretch',
-    marginRight: spacing.md,
-    backgroundColor: colors.borderStrong,
+    backgroundColor: colors.border,
+  },
+  inputSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   input: {
     flex: 1,
     fontFamily: fonts.medium,
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 22,
     color: colors.textPrimary,
     paddingVertical: 0,
-    letterSpacing: 0.5,
   },
-  clearBtn: {
-    marginLeft: spacing.xs,
-  },
-  spacer: {
-    flex: 1,
-  },
-  legal: {
-    textAlign: 'center',
-    lineHeight: 20,
+  bottomLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xl,
   },
 });
