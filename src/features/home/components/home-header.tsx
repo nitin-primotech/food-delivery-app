@@ -45,21 +45,6 @@ export function HomeHeader() {
     <View style={[styles.wrap, { paddingTop: spacing.xs }]}>
       <View style={styles.row}>
         <Pressable
-          style={styles.menuBtn}
-          onPress={() => router.push('/(tabs)/profile')}
-          accessibilityRole="button"
-          accessibilityLabel="Menu"
-        >
-          <AppSymbol
-            name="line.3.horizontal"
-            size={20}
-            tintColor={colors.textPrimary}
-          />
-        </Pressable>
-
-        <View style={styles.divider} />
-
-        <Pressable
           style={styles.location}
           onPress={() => router.push('/location')}
           accessibilityRole="button"
@@ -152,10 +137,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minWidth: 0,
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   locationLabel: {
-    flex: 1,
-    minWidth: 0,
+    flexShrink: 1,
     fontFamily: fonts.bold,
     fontSize: 14,
     lineHeight: 18,
@@ -163,7 +149,7 @@ const styles = StyleSheet.create({
   },
   chevron: {
     flexShrink: 0,
-    marginLeft: 2,
+    marginLeft: spacing.xxs,
   },
   actions: {
     flexDirection: 'row',
