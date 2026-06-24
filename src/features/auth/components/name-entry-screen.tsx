@@ -1,10 +1,10 @@
 import { type Href, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Pressable,
-  ScrollView,
   StyleSheet,
   TextInput,
   View,
@@ -50,21 +50,8 @@ export function NameEntryScreen() {
         style={styles.flex}
         keyboardVerticalOffset={0}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="never"
-          bounces={false}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingTop: insets.top + spacing.sm,
-              paddingBottom: insets.bottom + spacing.lg,
-            },
-          ]}
-        >
-          <View style={styles.page}>
-            {/* <Pressable
+        <View style={[styles.page, { paddingTop: insets.top + 40 }]}>
+          {/* <Pressable
               onPress={handleBack}
               style={styles.backButton}
               hitSlop={12}
@@ -78,7 +65,16 @@ export function NameEntryScreen() {
               />
             </Pressable> */}
 
-            <View style={styles.hero}>
+          <View style={styles.illustrationWrap}>
+            <Image
+              source={require('@/assets/images/chef.png')}
+              style={styles.illustrationImage}
+              contentFit="contain"
+              transition={180}
+            />
+          </View>
+
+          {/* <View style={styles.hero}>
               <View style={styles.brandRow}>
                 <View style={styles.brandIcon} accessibilityElementsHidden>
                   <View style={styles.brandKnob} />
@@ -144,81 +140,80 @@ export function NameEntryScreen() {
                   </View>
                 </View>
               </View>
+            </View> */}
+
+          <View style={styles.formSection}>
+            <View style={styles.inputGroup}>
+              <PremiumText variant="bodyMedium" style={styles.inputLabel}>
+                Full Name
+              </PremiumText>
+              <View style={styles.inputWrap}>
+                <AppSymbol
+                  name="person.fill"
+                  size={18}
+                  tintColor={colors.textTertiary}
+                />
+                <TextInput
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Enter your full name"
+                  placeholderTextColor={colors.textTertiary}
+                  style={styles.input}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  textContentType="name"
+                  autoComplete="name"
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+                {name.length > 0 ? (
+                  <Pressable onPress={() => setName('')} hitSlop={8}>
+                    <AppSymbol
+                      name="xmark.circle.fill"
+                      size={22}
+                      tintColor={colors.textTertiary}
+                    />
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
 
-            <View style={styles.formSection}>
-              <View style={styles.inputGroup}>
-                <PremiumText variant="bodyMedium" style={styles.inputLabel}>
-                  Full Name
-                </PremiumText>
-                <View style={styles.inputWrap}>
-                  <AppSymbol
-                    name="person.fill"
-                    size={18}
-                    tintColor={colors.textTertiary}
-                  />
-                  <TextInput
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="Enter your full name"
-                    placeholderTextColor={colors.textTertiary}
-                    style={styles.input}
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                    textContentType="name"
-                    autoComplete="name"
-                    returnKeyType="done"
-                    onSubmitEditing={() => Keyboard.dismiss()}
-                  />
-                  {name.length > 0 ? (
-                    <Pressable onPress={() => setName('')} hitSlop={8}>
-                      <AppSymbol
-                        name="xmark.circle.fill"
-                        size={22}
-                        tintColor={colors.textTertiary}
-                      />
-                    </Pressable>
-                  ) : null}
-                </View>
-              </View>
-
-              <View style={styles.safetyCard}>
-                <View style={styles.safetyIconShell}>
-                  <AppSymbol
-                    name="shield.fill"
-                    size={22}
-                    tintColor={colors.primary}
-                  />
-                </View>
-                <View style={styles.safetyCopy}>
-                  <PremiumText variant="bodyMedium" style={styles.safetyTitle}>
-                    Don&apos;t worry
-                  </PremiumText>
-                  <PremiumText
-                    variant="body"
-                    color={colors.textSecondary}
-                    style={styles.safetyText}
-                  >
-                    Your information is safe with us
-                  </PremiumText>
-                </View>
+            <View style={styles.safetyCard}>
+              <View style={styles.safetyIconShell}>
                 <AppSymbol
-                  name="lock.fill"
-                  size={16}
+                  name="shield.fill"
+                  size={22}
                   tintColor={colors.primary}
                 />
               </View>
-            </View>
-
-            <View style={styles.footer}>
-              <PremiumButton
-                label="Continue"
-                onPress={handleContinue}
-                disabled={!canContinue}
+              <View style={styles.safetyCopy}>
+                <PremiumText variant="bodyMedium" style={styles.safetyTitle}>
+                  Don&apos;t worry
+                </PremiumText>
+                <PremiumText
+                  variant="body"
+                  color={colors.textSecondary}
+                  style={styles.safetyText}
+                >
+                  Your information is safe with us
+                </PremiumText>
+              </View>
+              <AppSymbol
+                name="lock.fill"
+                size={16}
+                tintColor={colors.primary}
               />
             </View>
           </View>
-        </ScrollView>
+
+          <View style={[styles.footer, { marginBottom: insets.bottom + 30 }]}>
+            <PremiumButton
+              label="Continue"
+              onPress={handleContinue}
+              disabled={!canContinue}
+            />
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </View>
   );
@@ -537,5 +532,17 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 'auto',
     paddingTop: spacing.xl,
+  },
+  illustrationWrap: {
+    alignSelf: 'center',
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  illustrationImage: {
+    width: 300,
+    height: 300,
   },
 });

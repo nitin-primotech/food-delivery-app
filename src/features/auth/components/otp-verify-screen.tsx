@@ -243,7 +243,7 @@ export function OtpVerifyScreen() {
 
             <View style={styles.illustrationWrap}>
               <Image
-                source={require('@/assets/images/password.png')}
+                source={require('@/assets/images/otp-verify.png')}
                 style={styles.illustrationImage}
                 contentFit="contain"
                 transition={180}
@@ -448,8 +448,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   illustrationImage: {
-    width: 150,
-    height: 150,
+    width: 266,
+    height: 250,
   },
   content: {
     gap: spacing.md,
