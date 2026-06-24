@@ -90,7 +90,7 @@ export function AuthOnboardingShell({
           <View style={[styles.keyboardFill]} pointerEvents="none" />
         ) : null}
 
-        <View style={[styles.hero, { paddingTop: insets.top + spacing.sm }]}>
+        <View style={[styles.hero, { paddingTop: insets.top }]}>
           <Pressable
             onPress={onBack}
             style={styles.backBtn}
@@ -198,8 +198,8 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontFamily: fonts.bold,
-    fontSize: 26,
-    lineHeight: 32,
+    fontSize: 24,
+    lineHeight: 28,
     color: colors.textPrimary,
     textAlign: 'center',
   },
