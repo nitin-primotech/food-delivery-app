@@ -9,6 +9,7 @@ import { CartBottomSheet } from '@/shared/components/cart-bottom-sheet';
 import { CartDropAnimation } from '@/shared/components/cart-drop-animation';
 import { EmptyCartPrompt } from '@/shared/components/empty-cart-prompt';
 import { FloatingCartBar } from '@/shared/components/floating-cart-bar';
+import { ProfileSavedToast } from '@/shared/components/profile-saved-toast';
 import { WishlistSavedToast } from '@/shared/components/wishlist-saved-toast';
 import { preloadAppHaptics } from '@/shared/haptics/feedback';
 import {
@@ -193,6 +194,7 @@ export default function RootLayout() {
           <>
             <CartDropAnimation />
             <WishlistSavedToast />
+            <ProfileSavedToast />
             {showFloatingCartBar ? <FloatingCartBar /> : null}
             <CartBottomSheet />
             <EmptyCartPrompt />

@@ -26,6 +26,7 @@ type AppState = {
   hasConfirmedAddress: boolean;
   preferences: UserPreferences;
   recentSearches: string[];
+  profileSavedToken: number | null;
 };
 
 export const useAppStore = create<AppState>(() => ({
@@ -37,6 +38,7 @@ export const useAppStore = create<AppState>(() => ({
   hasConfirmedAddress: false,
   preferences: DEFAULT_PREFERENCES,
   recentSearches: ['Biryani', 'Paratha', 'Paneer'],
+  profileSavedToken: null,
 }));
 
 async function persistProfile() {
@@ -81,6 +83,14 @@ export function updateProfileName(name: string) {
   if (!trimmed) return;
   useAppStore.setState({ userName: trimmed });
   void persistProfile();
+}
+
+export function markProfileSaved() {
+  useAppStore.setState({ profileSavedToken: Date.now() });
+}
+
+export function clearProfileSavedToast() {
+  useAppStore.setState({ profileSavedToken: null });
 }
 
 export function setDeliveryAddressFromSuggestion(
@@ -152,3 +162,4 @@ export const selectOnboardingStep = (s: AppState) => s.onboardingStep;
 export const selectHasConfirmedAddress = (s: AppState) => s.hasConfirmedAddress;
 export const selectPreferences = (s: AppState) => s.preferences;
 export const selectRecentSearches = (s: AppState) => s.recentSearches;
+export const selectProfileSavedToken = (s: AppState) => s.profileSavedToken;

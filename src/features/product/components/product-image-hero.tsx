@@ -52,11 +52,9 @@ export function ProductImageHero({
           style={StyleSheet.absoluteFill}
         />
 
-        <View style={styles.glow} />
-        <View style={styles.pedestal} />
-
         {images.length > 0 ? (
           <ScrollView
+            style={styles.galleryScroll}
             horizontal
             pagingEnabled
             nestedScrollEnabled
@@ -73,7 +71,7 @@ export function ProductImageHero({
                 <Image
                   source={{ uri: imageUri }}
                   style={styles.image}
-                  contentFit="contain"
+                  contentFit="cover"
                   transition={220}
                 />
               </View>
@@ -120,33 +118,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFDFB',
     boxShadow: '0 10px 28px rgba(28, 28, 30, 0.08)',
   },
-  glow: {
-    position: 'absolute',
-    top: '18%',
-    alignSelf: 'center',
-    width: '62%',
-    height: '62%',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
-  },
-  pedestal: {
-    position: 'absolute',
-    bottom: 18,
-    alignSelf: 'center',
-    width: '54%',
-    height: 18,
-    borderRadius: 999,
-    backgroundColor: 'rgba(212, 84, 60, 0.08)',
+  galleryScroll: {
+    ...StyleSheet.absoluteFill,
   },
   galleryRow: {
-    alignItems: 'center',
+    height: STAGE_HEIGHT,
   },
   slide: {
     height: STAGE_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',

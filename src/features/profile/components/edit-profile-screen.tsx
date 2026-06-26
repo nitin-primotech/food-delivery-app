@@ -16,16 +16,18 @@ import {
   profileInitials,
 } from '@/features/profile/constants/profile.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { PROFILE_SAVED_NAV_DELAY_MS } from '@/shared/components/profile-saved-toast';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
 import { formTextInputProps } from '@/shared/utils/keyboard';
 import {
+  markProfileSaved,
   selectAddress,
   selectUserName,
   updateProfileName,
   useAppStore,
 } from '@/store/app.store';
 import { selectUserPhone, useAuthStore } from '@/store/auth.store';
-import { colors, shadows } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
@@ -35,17 +37,23 @@ export function EditProfileScreen() {
   const phone = useAuthStore(selectUserPhone);
   const address = useAppStore(selectAddress);
   const [name, setName] = useState(userName ?? '');
+  const [isSaving, setIsSaving] = useState(false);
 
   const trimmed = name.trim();
-  const canSave = trimmed.length >= 2 && trimmed !== (userName ?? '');
+  const canSave =
+    !isSaving && trimmed.length >= 2 && trimmed !== (userName ?? '');
   const displayPhone = phone ? formatProfilePhone(phone) : 'Not linked';
 
   function handleSave() {
     if (!canSave) return;
     Keyboard.dismiss();
+    setIsSaving(true);
     updateProfileName(trimmed);
+    markProfileSaved();
     hapticSuccess();
-    router.back();
+    setTimeout(() => {
+      router.back();
+    }, PROFILE_SAVED_NAV_DELAY_MS);
   }
 
   return (
@@ -54,7 +62,7 @@ export function EditProfileScreen() {
       accentTitle="Profile"
       subtitle="Update your account details"
     >
-      <View style={[styles.avatarCard, shadows.soft]}>
+      <View style={styles.avatarWrap}>
         <View style={styles.avatar}>
           <Text style={styles.avatarInitials}>
             {profileInitials(trimmed || userName)}
@@ -175,9 +183,12 @@ export function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  avatarCard: {
+  avatarWrap: {
     alignSelf: 'center',
+    width: 88,
+    height: 88,
     marginBottom: spacing.xs,
+    position: 'relative',
   },
   avatar: {
     width: 88,
@@ -202,7 +213,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: colors.backgroundElevated,
+    backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -222,7 +233,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.backgroundElevated,
+    backgroundColor: colors.backgroundMuted,
     borderRadius: 14,
     borderCurve: 'continuous',
     borderWidth: 1,
@@ -232,7 +243,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   inputRowDisabled: {
-    backgroundColor: colors.backgroundMuted,
+    opacity: 0.92,
   },
   input: {
     flex: 1,
