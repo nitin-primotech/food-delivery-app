@@ -24,11 +24,6 @@ export function HomeSearchBar() {
       <Text style={styles.placeholder} numberOfLines={1}>
         Search for products, brands and more...
       </Text>
-      <AppSymbol
-        name="qrcode.viewfinder"
-        size={20}
-        tintColor={colors.textPrimary}
-      />
     </Pressable>
   );
 }

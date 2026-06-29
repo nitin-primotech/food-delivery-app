@@ -1,70 +1,51 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { ProductReviewCard } from '@/features/product/components/product-review-card';
 import { StarRating } from '@/features/product/components/star-rating';
-import {
-  MOCK_PRODUCT_REVIEWS,
-  PRODUCT_REVIEWS_PREVIEW_COUNT,
-} from '@/features/product/constants/product.constants';
+import { MOCK_PRODUCT_REVIEWS } from '@/features/product/constants/product.constants';
 import { getRatingDistribution } from '@/features/product/utils/product-gallery';
+import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
-type ProductReviewsSectionProps = {
-  rating: number;
-  reviewCount: number;
-  onViewAll: () => void;
-};
-
 const RATING_BARS = [5, 4, 3, 2, 1] as const;
 
-export function ProductReviewsSection({
-  rating,
-  reviewCount,
-  onViewAll,
-}: ProductReviewsSectionProps) {
+export function ProductReviewsScreen() {
+  const { itemName, rating, reviewCount } = useLocalSearchParams<{
+    itemName?: string;
+    rating?: string;
+    reviewCount?: string;
+  }>();
+
+  const parsedRating = Number(rating) || 4.5;
+  const parsedReviewCount = Number(reviewCount) || MOCK_PRODUCT_REVIEWS.length;
+  const title = itemName?.trim() || 'This dish';
+
   const distribution = useMemo(
-    () => getRatingDistribution(rating, reviewCount),
-    [rating, reviewCount],
+    () => getRatingDistribution(parsedRating, parsedReviewCount),
+    [parsedRating, parsedReviewCount],
   );
   const maxCount = Math.max(
     ...RATING_BARS.map((stars) => distribution[stars]),
     1,
   );
-  const previewReviews = MOCK_PRODUCT_REVIEWS.slice(
-    0,
-    PRODUCT_REVIEWS_PREVIEW_COUNT,
-  );
 
   return (
-    <View style={styles.wrap}>
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          Customer Reviews ({reviewCount.toLocaleString('en-IN')})
-        </Text>
-        <Pressable
-          onPress={() => {
-            hapticSoftTap();
-            onViewAll();
-          }}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="View all reviews"
-        >
-          <Text style={styles.viewAll}>View All</Text>
-        </Pressable>
-      </View>
-
+    <ProfileSubScreenShell
+      title="Customer"
+      accentTitle="Reviews"
+      subtitle={title}
+    >
       <View style={styles.summaryCard}>
         <View style={styles.summaryLeft}>
-          <Text style={styles.ratingValue}>{rating.toFixed(1)}</Text>
-          <StarRating rating={rating} size={13} />
+          <Text style={styles.ratingValue}>{parsedRating.toFixed(1)}</Text>
+          <StarRating rating={parsedRating} size={13} />
           <Text style={styles.ratingCount}>
-            {reviewCount.toLocaleString('en-IN')} ratings
+            {parsedReviewCount.toLocaleString('en-IN')} ratings
           </Text>
         </View>
 
@@ -97,36 +78,17 @@ export function ProductReviewsSection({
         </View>
       </View>
 
-      <Text style={styles.topReviews}>Top Reviews</Text>
-      {previewReviews.map((review) => (
-        <ProductReviewCard key={review.id} review={review} />
-      ))}
-    </View>
+      <Text style={styles.sectionTitle}>All reviews</Text>
+      <View style={styles.list}>
+        {MOCK_PRODUCT_REVIEWS.map((review) => (
+          <ProductReviewCard key={review.id} review={review} />
+        ))}
+      </View>
+    </ProfileSubScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    gap: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontFamily: fonts.bold,
-    fontSize: 15,
-    lineHeight: 20,
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  viewAll: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    lineHeight: 16,
-    color: colors.primary,
-  },
   summaryCard: {
     flexDirection: 'row',
     gap: spacing.md,
@@ -191,11 +153,13 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
     textAlign: 'right',
   },
-  topReviews: {
+  sectionTitle: {
     fontFamily: fonts.semibold,
-    fontSize: 13,
-    lineHeight: 17,
+    fontSize: 15,
+    lineHeight: 20,
     color: colors.textPrimary,
-    marginTop: spacing.xs,
+  },
+  list: {
+    gap: spacing.sm,
   },
 });

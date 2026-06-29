@@ -1,5 +1,5 @@
 import { useLocalSearchParams, usePathname, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,7 +17,7 @@ import { ProductImageHero } from '@/features/product/components/product-image-he
 import { ProductReviewsSection } from '@/features/product/components/product-reviews-section';
 import { StarRating } from '@/features/product/components/star-rating';
 import {
-  formatDeliveryDate,
+  formatDeliveryEta,
   formatServingLabel,
   getProductDetailBullets,
   PRODUCT_TRUST_ITEMS,
@@ -47,13 +47,6 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
-function formatCountdown(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(hours).padStart(2, '0')}h : ${String(minutes).padStart(2, '0')}m : ${String(seconds).padStart(2, '0')}s`;
-}
-
 export function ProductDetailScreen() {
   const router = useRouter();
   const pathname = usePathname();
@@ -63,7 +56,6 @@ export function ProductDetailScreen() {
     itemId: string;
   }>();
   const cartCount = useCartStore(selectCartItemCount);
-  const [countdown, setCountdown] = useState(2 * 3600 + 15 * 60 + 30);
 
   const { data, status, error, refetch } = useSimulatedQuery(
     (signal) => fetchMenuItemContext(restaurantId ?? '', itemId ?? '', signal),
@@ -79,13 +71,6 @@ export function ProductDetailScreen() {
     () => (data ? getRelatedMenuItems(data.restaurant, data.item.id, 3) : []),
     [data],
   );
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((value) => (value > 0 ? value - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   if (status === 'loading') {
     return (
@@ -267,16 +252,19 @@ export function ProductDetailScreen() {
 
             <View style={styles.deliveryCard}>
               <Text style={styles.deliveryTitle}>
-                Delivery by{' '}
+                Delivery in{' '}
                 <Text style={styles.deliveryAccent}>
-                  {formatDeliveryDate()}
+                  {formatDeliveryEta(
+                    restaurant.deliveryTimeMin,
+                    restaurant.deliveryTimeMax,
+                  )}
                 </Text>
               </Text>
-              <Text style={styles.deliveryCountdown}>
-                Order within{' '}
-                <Text style={styles.deliveryAccent}>
-                  {formatCountdown(countdown)}
-                </Text>
+              <Text style={styles.deliverySubtitle}>
+                {restaurant.isFastDelivery
+                  ? 'Express delivery from '
+                  : 'Delivered fresh from '}
+                {restaurant.name}
               </Text>
             </View>
           </View>
@@ -317,6 +305,18 @@ export function ProductDetailScreen() {
         <ProductReviewsSection
           rating={restaurant.rating}
           reviewCount={restaurant.reviewCount}
+          onViewAll={() =>
+            router.push({
+              pathname: '/product/[restaurantId]/[itemId]/reviews',
+              params: {
+                restaurantId: restaurant.id,
+                itemId: item.id,
+                itemName: item.name,
+                rating: String(restaurant.rating),
+                reviewCount: String(restaurant.reviewCount),
+              },
+            })
+          }
         />
       </ScrollView>
 
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: colors.primary,
   },
-  deliveryCountdown: {
+  deliverySubtitle: {
     fontFamily: fonts.regular,
     fontSize: 11,
     lineHeight: 14,

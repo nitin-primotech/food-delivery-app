@@ -11,14 +11,12 @@ import {
 } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
-import {
-  formatProfilePhone,
-  profileInitials,
-} from '@/features/profile/constants/profile.constants';
+import { formatProfilePhone } from '@/features/profile/constants/profile.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PROFILE_SAVED_NAV_DELAY_MS } from '@/shared/components/profile-saved-toast';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
 import { formTextInputProps } from '@/shared/utils/keyboard';
+import { filterPersonNameInput } from '@/shared/utils/person-name';
 import {
   markProfileSaved,
   selectAddress,
@@ -62,17 +60,6 @@ export function EditProfileScreen() {
       accentTitle="Profile"
       subtitle="Update your account details"
     >
-      <View style={styles.avatarWrap}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarInitials}>
-            {profileInitials(trimmed || userName)}
-          </Text>
-        </View>
-        <View style={styles.avatarIcon}>
-          <AppSymbol name="person.fill" size={14} tintColor={colors.primary} />
-        </View>
-      </View>
-
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Full name</Text>
         <View style={styles.inputRow}>
@@ -83,7 +70,7 @@ export function EditProfileScreen() {
           />
           <TextInput
             value={name}
-            onChangeText={setName}
+            onChangeText={(text) => setName(filterPersonNameInput(text))}
             placeholder="Your name"
             placeholderTextColor={colors.textTertiary}
             style={styles.input}
@@ -94,6 +81,7 @@ export function EditProfileScreen() {
             onSubmitEditing={handleSave}
             selectionColor={colors.primary}
             {...formTextInputProps}
+            maxLength={30}
           />
           {name.length > 0 ? (
             <Pressable

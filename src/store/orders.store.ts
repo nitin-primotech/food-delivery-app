@@ -64,6 +64,11 @@ export function stopOrdersSync(): void {
   ordersUnsubscribe = null;
 }
 
+export function resetOrders() {
+  stopOrdersSync();
+  useOrdersStore.setState(initialState);
+}
+
 type PlaceOrderInput = {
   items: CartItem[];
   subtotal: number;

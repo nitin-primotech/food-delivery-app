@@ -8,6 +8,7 @@ import { NAME_ONBOARDING_COPY } from '@/features/auth/constants/auth-onboarding.
 import { authScreenStyles } from '@/features/auth/constants/auth-screen.styles';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { formTextInputProps } from '@/shared/utils/keyboard';
+import { filterPersonNameInput } from '@/shared/utils/person-name';
 import { setUserName } from '@/store/app.store';
 import { colors } from '@/theme/colors';
 
@@ -46,7 +47,7 @@ export function NameEntryScreen() {
           <TextInput
             ref={inputRef}
             value={name}
-            onChangeText={setName}
+            onChangeText={(text) => setName(filterPersonNameInput(text))}
             placeholder="Full name"
             placeholderTextColor={colors.textTertiary}
             style={authScreenStyles.input}

@@ -1,5 +1,5 @@
 import { type Href, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,6 +11,7 @@ import {
   PROFILE_QUICK_STATS,
   profileInitials,
 } from '@/features/profile/constants/profile.constants';
+import { AppConfirmModal } from '@/shared/components/app-confirm-modal';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
@@ -46,20 +47,29 @@ export function ProfileScreen() {
   const address = useAppStore(selectAddress);
   const orders = useOrdersStore(selectOrders);
   const cartCount = useCartStore(selectCartItemCount);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
   const trackableOrder = useMemo(
-    () => orders.find((order) => order.status !== 'delivered') ?? null,
+    () =>
+      orders.find(
+        (order) => order.status !== 'delivered' && order.status !== 'cancelled',
+      ) ?? null,
     [orders],
   );
 
   const displayName = userName ?? 'Guest User';
   const displayPhone = phone ? formatProfilePhone(phone) : '+91 ••••• •••••';
 
-  async function handleLogout() {
-    hapticSoftTap();
+  async function performLogout() {
+    setLogoutModalVisible(false);
     await clearAuthState();
     await resetAppProfile();
     router.replace('/(auth)/welcome');
+  }
+
+  function handleLogout() {
+    hapticSoftTap();
+    setLogoutModalVisible(true);
   }
 
   function openOrders(tab: OrderTabId = 'all') {
@@ -71,12 +81,9 @@ export function ProfileScreen() {
   }
 
   function handleTrackOrder() {
+    if (!trackableOrder) return;
     hapticSoftTap();
-    if (trackableOrder) {
-      router.push(`/order/${trackableOrder.id}`);
-      return;
-    }
-    openOrders('shipped');
+    router.push(`/order/${trackableOrder.id}`);
   }
 
   function openProfileHub(route: Href) {
@@ -152,7 +159,9 @@ export function ProfileScreen() {
           </View>
 
           <View style={styles.profileCopy}>
-            <Text style={styles.profileName}>{displayName}</Text>
+            <Text numberOfLines={1} style={styles.profileName}>
+              {displayName}
+            </Text>
             <Text style={styles.profilePhone}>{displayPhone}</Text>
             <View style={styles.verifiedBadge}>
               <AppSymbol
@@ -255,31 +264,31 @@ export function ProfileScreen() {
             ))}
           </View>
 
-          <View style={styles.trackBanner}>
-            <View style={styles.trackBannerIcon}>
-              <AppSymbol
-                name="location.fill"
-                size={16}
-                tintColor={colors.primary}
-              />
+          {trackableOrder ? (
+            <View style={styles.trackBanner}>
+              <View style={styles.trackBannerIcon}>
+                <AppSymbol
+                  name="location.fill"
+                  size={16}
+                  tintColor={colors.primary}
+                />
+              </View>
+              <View style={styles.trackBannerCopy}>
+                <Text style={styles.trackBannerTitle}>Track your order</Text>
+                <Text style={styles.trackBannerSubtitle}>
+                  Get real-time updates on your order
+                </Text>
+              </View>
+              <Pressable
+                onPress={handleTrackOrder}
+                style={styles.trackBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Track order"
+              >
+                <Text style={styles.trackBtnText}>Track Order</Text>
+              </Pressable>
             </View>
-            <View style={styles.trackBannerCopy}>
-              <Text style={styles.trackBannerTitle}>Track your order</Text>
-              <Text style={styles.trackBannerSubtitle}>
-                {trackableOrder
-                  ? `Get real-time updates on your order`
-                  : 'Get real-time updates on your order'}
-              </Text>
-            </View>
-            <Pressable
-              onPress={handleTrackOrder}
-              style={styles.trackBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Track order"
-            >
-              <Text style={styles.trackBtnText}>Track Order</Text>
-            </Pressable>
-          </View>
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -383,7 +392,42 @@ export function ProfileScreen() {
             tintColor={colors.textTertiary}
           />
         </Pressable>
+
+        <Pressable
+          onPress={() => openProfileHub('/profile/delete')}
+          style={styles.deleteRow}
+          accessibilityRole="button"
+          accessibilityLabel="Delete account"
+        >
+          <View style={styles.logoutIcon}>
+            <AppSymbol name="trash" size={16} tintColor={colors.danger} />
+          </View>
+          <View style={styles.logoutCopy}>
+            <Text style={styles.logoutTitle}>Delete Account</Text>
+            <Text style={styles.logoutSubtitle}>
+              Permanently remove your profile and data
+            </Text>
+          </View>
+          <AppSymbol
+            name="chevron.right"
+            size={12}
+            tintColor={colors.textTertiary}
+          />
+        </Pressable>
       </ScrollView>
+
+      <AppConfirmModal
+        visible={logoutModalVisible}
+        title="Log out?"
+        message="You will need to sign in again to access your account."
+        confirmLabel="Log out"
+        icon="rectangle.portrait.and.arrow.right"
+        destructive
+        onClose={() => setLogoutModalVisible(false)}
+        onConfirm={() => {
+          void performLogout();
+        }}
+      />
     </View>
   );
 }
@@ -750,6 +794,12 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.divider,
+  },
+  deleteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
   logoutIcon: {
     width: 36,

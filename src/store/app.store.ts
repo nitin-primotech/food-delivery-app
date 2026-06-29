@@ -14,6 +14,7 @@ import type {
 } from '@/features/auth/types/onboarding.types';
 import { DEFAULT_PREFERENCES } from '@/features/auth/types/onboarding.types';
 import type { DeliveryAddress } from '@/features/catalog/types/catalog.types';
+import { filterPersonNameInput } from '@/shared/utils/person-name';
 
 type AppHydrationStatus = 'loading' | 'ready';
 
@@ -72,14 +73,14 @@ export function setOnboardingStep(step: OnboardingStep) {
 }
 
 export function setUserName(name: string) {
-  const trimmed = name.trim();
+  const trimmed = filterPersonNameInput(name).trim();
   if (!trimmed) return;
   useAppStore.setState({ userName: trimmed, onboardingStep: 'location' });
   void persistProfile();
 }
 
 export function updateProfileName(name: string) {
-  const trimmed = name.trim();
+  const trimmed = filterPersonNameInput(name).trim();
   if (!trimmed) return;
   useAppStore.setState({ userName: trimmed });
   void persistProfile();

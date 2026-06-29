@@ -11,6 +11,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="membership" />
       <Stack.Screen name="support" />
       <Stack.Screen name="payments" />
+      <Stack.Screen name="delete" />
     </Stack>
   );
 }

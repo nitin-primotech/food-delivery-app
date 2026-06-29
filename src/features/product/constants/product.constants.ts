@@ -6,7 +6,18 @@ export const PRODUCT_TRUST_ITEMS = [
   { icon: 'arrow.2.circlepath', label: 'Easy Returns' },
 ] as const;
 
-export const MOCK_PRODUCT_REVIEWS = [
+export type ProductReview = {
+  id: string;
+  name: string;
+  rating: number;
+  text: string;
+  daysAgo: number;
+  verified: boolean;
+};
+
+export const PRODUCT_REVIEWS_PREVIEW_COUNT = 2;
+
+export const MOCK_PRODUCT_REVIEWS: ProductReview[] = [
   {
     id: 'rev-1',
     name: 'Rahul Sharma',
@@ -23,7 +34,55 @@ export const MOCK_PRODUCT_REVIEWS = [
     daysAgo: 5,
     verified: true,
   },
-] as const;
+  {
+    id: 'rev-3',
+    name: 'Amit Verma',
+    rating: 5,
+    text: 'Exactly what I expected — hot, flavourful and well packed.',
+    daysAgo: 8,
+    verified: true,
+  },
+  {
+    id: 'rev-4',
+    name: 'Sneha Kapoor',
+    rating: 4,
+    text: 'Loved the taste. Delivery was quick and the rider was polite.',
+    daysAgo: 11,
+    verified: true,
+  },
+  {
+    id: 'rev-5',
+    name: 'Karan Mehta',
+    rating: 5,
+    text: 'One of the better orders I have placed on foodRush. Highly recommend.',
+    daysAgo: 14,
+    verified: false,
+  },
+  {
+    id: 'rev-6',
+    name: 'Divya Joshi',
+    rating: 3,
+    text: 'Taste was good but portion felt slightly smaller than expected.',
+    daysAgo: 18,
+    verified: true,
+  },
+  {
+    id: 'rev-7',
+    name: 'Vikram Singh',
+    rating: 5,
+    text: 'Perfect for a quick lunch. Arrived warm and the spices were spot on.',
+    daysAgo: 21,
+    verified: true,
+  },
+  {
+    id: 'rev-8',
+    name: 'Ananya Reddy',
+    rating: 4,
+    text: 'Reliable quality every time from this kitchen. Good value for money.',
+    daysAgo: 26,
+    verified: true,
+  },
+];
 
 export function getProductDetailBullets(item: MenuItem): string[] {
   const bullets = [
@@ -47,12 +106,7 @@ export function formatServingLabel(item: MenuItem): string {
   return '1 serving';
 }
 
-export function formatDeliveryDate(): string {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-  });
+export function formatDeliveryEta(min: number, max: number): string {
+  if (min === max) return `${min} min`;
+  return `${min}–${max} min`;
 }

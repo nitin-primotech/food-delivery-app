@@ -6,6 +6,7 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -93,118 +94,195 @@ export function LocationSearchScreen({
     spacing.xl +
     (pendingSelection ? CONFIRM_SHEET_HEIGHT + spacing.md : 0);
 
-  return (
-    <View style={styles.root}>
-      <AppStatusBar style="dark" />
-      <View style={[styles.content, { paddingTop: insets.top + spacing.md }]}>
-        <View style={styles.header}>
-          <ScreenBackButton onPress={handleBack} />
-          <PremiumText variant="h3">
-            {isOnboarding
-              ? 'Enter your area or apartment name'
-              : 'Change delivery location'}
+  const listHeader = (
+    <View>
+      <View style={styles.header}>
+        <ScreenBackButton onPress={handleBack} />
+        <PremiumText variant="h3">
+          {isOnboarding
+            ? 'Enter your area or apartment name'
+            : 'Change delivery location'}
+        </PremiumText>
+        {isOnboarding ? (
+          <PremiumText variant="caption" color={colors.textSecondary}>
+            We deliver to this area — pick the closest match
           </PremiumText>
-          {isOnboarding ? (
-            <PremiumText variant="caption" color={colors.textSecondary}>
-              We deliver to this area — pick the closest match
-            </PremiumText>
-          ) : null}
-        </View>
+        ) : null}
+      </View>
 
-        <View style={styles.searchWrap}>
-          <AppSymbol
-            name="magnifyingglass"
-            size={20}
-            tintColor={colors.textTertiary}
-          />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search Mohali, Delhi, Noida…"
-            placeholderTextColor={colors.textTertiary}
-            style={styles.searchInput}
-            autoCorrect={false}
-            autoCapitalize="words"
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-            {...formTextInputProps}
-          />
-          {query.length > 0 ? (
-            <Pressable onPress={() => setQuery('')} hitSlop={8}>
-              <AppSymbol
-                name="xmark.circle.fill"
-                size={22}
-                tintColor={colors.textTertiary}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-
-        <Pressable style={styles.actionRow} onPress={useCurrentLocation}>
-          <View style={styles.actionIcon}>
+      <View style={styles.searchWrap}>
+        <AppSymbol
+          name="magnifyingglass"
+          size={20}
+          tintColor={colors.textTertiary}
+        />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search Mohali, Delhi, Noida…"
+          placeholderTextColor={colors.textTertiary}
+          style={styles.searchInput}
+          autoCorrect={false}
+          autoCapitalize="words"
+          returnKeyType="done"
+          onSubmitEditing={() => Keyboard.dismiss()}
+          {...formTextInputProps}
+        />
+        {query.length > 0 ? (
+          <Pressable onPress={() => setQuery('')} hitSlop={8}>
             <AppSymbol
-              name="location.fill"
-              size={20}
-              tintColor={colors.primary}
+              name="xmark.circle.fill"
+              size={22}
+              tintColor={colors.textTertiary}
             />
-          </View>
-          <PremiumText
-            variant="bodySmall"
-            color={colors.primary}
-            style={styles.actionLabel}
-          >
-            Use my current location
-          </PremiumText>
+          </Pressable>
+        ) : null}
+      </View>
+
+      <Pressable style={styles.actionRow} onPress={useCurrentLocation}>
+        <View style={styles.actionIcon}>
           <AppSymbol
-            name="chevron.right"
-            size={16}
+            name="location.fill"
+            size={20}
             tintColor={colors.primary}
           />
-        </Pressable>
-
-        <View style={styles.divider} />
-
+        </View>
         <PremiumText
-          variant="overline"
-          color={colors.textTertiary}
-          style={styles.sectionLabel}
+          variant="bodySmall"
+          color={colors.primary}
+          style={styles.actionLabel}
         >
-          {query.trim().length > 0 ? 'Search results' : 'Popular areas'}
+          Use my current location
         </PremiumText>
+        <AppSymbol name="chevron.right" size={16} tintColor={colors.primary} />
+      </Pressable>
 
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: listBottomPad }}
-          renderItem={({ item }) => {
-            const isSelected = pendingSelection?.id === item.id;
-            return (
-              <Pressable
-                style={[
-                  styles.resultRow,
-                  isSelected && styles.resultRowSelected,
-                ]}
-                onPress={() => selectSuggestion(item)}
-              >
-                <View style={styles.resultIcon}>
+      <View style={styles.divider} />
+
+      <PremiumText
+        variant="overline"
+        color={colors.textTertiary}
+        style={styles.sectionLabel}
+      >
+        {query.trim().length > 0 ? 'Search results' : 'Popular areas'}
+      </PremiumText>
+    </View>
+  );
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.root}>
+        <AppStatusBar style="dark" />
+        <View style={[styles.content, { paddingTop: insets.top + spacing.md }]}>
+          <FlatList
+            data={results}
+            keyExtractor={(item) => item.id}
+            style={styles.list}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            contentContainerStyle={{ paddingBottom: listBottomPad }}
+            onScrollBeginDrag={Keyboard.dismiss}
+            ListHeaderComponent={listHeader}
+            renderItem={({ item }) => {
+              const isSelected = pendingSelection?.id === item.id;
+              return (
+                <Pressable
+                  style={[
+                    styles.resultRow,
+                    isSelected && styles.resultRowSelected,
+                  ]}
+                  onPress={() => selectSuggestion(item)}
+                >
+                  <View style={styles.resultIcon}>
+                    <AppSymbol
+                      name="location.fill"
+                      size={18}
+                      tintColor={
+                        isSelected ? colors.primary : colors.textSecondary
+                      }
+                    />
+                  </View>
+                  <View style={styles.resultText}>
+                    <View style={styles.resultTitleRow}>
+                      <PremiumText
+                        variant="bodySmall"
+                        style={styles.resultTitle}
+                      >
+                        {item.title}
+                      </PremiumText>
+                      <View style={styles.cityPill}>
+                        <PremiumText variant="caption" color={colors.primary}>
+                          {CITY_LABEL[item.city]}
+                        </PremiumText>
+                      </View>
+                    </View>
+                    <PremiumText
+                      variant="caption"
+                      color={colors.textSecondary}
+                      numberOfLines={2}
+                    >
+                      {item.subtitle}
+                    </PremiumText>
+                  </View>
+                  {isSelected ? (
+                    <AppSymbol
+                      name="checkmark.circle.fill"
+                      size={22}
+                      tintColor={colors.primary}
+                    />
+                  ) : null}
+                </Pressable>
+              );
+            }}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <PremiumText variant="caption" color={colors.textSecondary}>
+                  No locations found. Try a different search.
+                </PremiumText>
+              </View>
+            }
+          />
+        </View>
+
+        {pendingSelection ? (
+          <View style={styles.confirmOverlay} pointerEvents="box-none">
+            <Pressable
+              style={styles.confirmBackdrop}
+              onPress={() => {
+                Keyboard.dismiss();
+                setPendingSelection(null);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss location confirmation"
+            />
+            <View
+              style={[
+                styles.confirmSheet,
+                shadows.card,
+                { paddingBottom: insets.bottom + spacing.md },
+              ]}
+            >
+              <View style={styles.confirmHandle} />
+              <PremiumText variant="overline" color={colors.textTertiary}>
+                Confirm delivery location
+              </PremiumText>
+              <View style={styles.confirmCard}>
+                <View style={styles.confirmIcon}>
                   <AppSymbol
-                    name="location.fill"
-                    size={18}
-                    tintColor={
-                      isSelected ? colors.primary : colors.textSecondary
-                    }
+                    name="mappin.circle.fill"
+                    size={28}
+                    tintColor={colors.primary}
                   />
                 </View>
-                <View style={styles.resultText}>
+                <View style={styles.confirmCopy}>
                   <View style={styles.resultTitleRow}>
-                    <PremiumText variant="bodySmall" style={styles.resultTitle}>
-                      {item.title}
+                    <PremiumText variant="bodyMedium">
+                      {pendingSelection.title}
                     </PremiumText>
                     <View style={styles.cityPill}>
                       <PremiumText variant="caption" color={colors.primary}>
-                        {CITY_LABEL[item.city]}
+                        {CITY_LABEL[pendingSelection.city]}
                       </PremiumText>
                     </View>
                   </View>
@@ -213,94 +291,29 @@ export function LocationSearchScreen({
                     color={colors.textSecondary}
                     numberOfLines={2}
                   >
-                    {item.subtitle}
+                    {pendingSelection.subtitle}
                   </PremiumText>
                 </View>
-                {isSelected ? (
-                  <AppSymbol
-                    name="checkmark.circle.fill"
-                    size={22}
-                    tintColor={colors.primary}
-                  />
-                ) : null}
-              </Pressable>
-            );
-          }}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <PremiumText variant="caption" color={colors.textSecondary}>
-                No locations found. Try a different search.
-              </PremiumText>
-            </View>
-          }
-        />
-      </View>
-
-      {pendingSelection ? (
-        <View style={styles.confirmOverlay} pointerEvents="box-none">
-          <Pressable
-            style={styles.confirmBackdrop}
-            onPress={() => setPendingSelection(null)}
-            accessibilityRole="button"
-            accessibilityLabel="Dismiss location confirmation"
-          />
-          <View
-            style={[
-              styles.confirmSheet,
-              shadows.card,
-              { paddingBottom: insets.bottom + spacing.md },
-            ]}
-          >
-            <View style={styles.confirmHandle} />
-            <PremiumText variant="overline" color={colors.textTertiary}>
-              Confirm delivery location
-            </PremiumText>
-            <View style={styles.confirmCard}>
-              <View style={styles.confirmIcon}>
-                <AppSymbol
-                  name="mappin.circle.fill"
-                  size={28}
-                  tintColor={colors.primary}
-                />
               </View>
-              <View style={styles.confirmCopy}>
-                <View style={styles.resultTitleRow}>
-                  <PremiumText variant="bodyMedium">
-                    {pendingSelection.title}
-                  </PremiumText>
-                  <View style={styles.cityPill}>
-                    <PremiumText variant="caption" color={colors.primary}>
-                      {CITY_LABEL[pendingSelection.city]}
-                    </PremiumText>
-                  </View>
-                </View>
-                <PremiumText
-                  variant="caption"
-                  color={colors.textSecondary}
-                  numberOfLines={2}
-                >
-                  {pendingSelection.subtitle}
+              <AuthContinueButton
+                label={isOnboarding ? 'Continue' : 'Confirm & proceed'}
+                onPress={proceedWithSelection}
+              />
+              <Pressable
+                onPress={() => setPendingSelection(null)}
+                style={styles.changeBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Choose another location"
+              >
+                <PremiumText variant="bodySmall" color={colors.primary}>
+                  Choose another location
                 </PremiumText>
-              </View>
+              </Pressable>
             </View>
-            <AuthContinueButton
-              label={isOnboarding ? 'Continue' : 'Confirm & proceed'}
-              onPress={proceedWithSelection}
-            />
-            <Pressable
-              onPress={() => setPendingSelection(null)}
-              style={styles.changeBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Choose another location"
-            >
-              <PremiumText variant="bodySmall" color={colors.primary}>
-                Choose another location
-              </PremiumText>
-            </Pressable>
           </View>
-        </View>
-      ) : null}
-    </View>
+        ) : null}
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -312,6 +325,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
+  },
+  list: {
+    flex: 1,
   },
   header: {
     gap: spacing.md,

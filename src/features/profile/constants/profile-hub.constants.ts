@@ -232,3 +232,37 @@ export const MEMBERSHIP_PERKS: MembershipPerk[] = [
     icon: 'tag.fill',
   },
 ];
+
+export type DeleteAccountImpact = {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+};
+
+export const DELETE_ACCOUNT_IMPACT: DeleteAccountImpact[] = [
+  {
+    id: 'profile',
+    title: 'Profile and preferences',
+    subtitle: 'Name, delivery area and dietary choices',
+    icon: 'person.fill',
+  },
+  {
+    id: 'orders',
+    title: 'Order history',
+    subtitle: 'Past and active orders on this device',
+    icon: 'bag.fill',
+  },
+  {
+    id: 'saved',
+    title: 'Saved items',
+    subtitle: 'Wishlist, cart and wallet balance',
+    icon: 'heart.fill',
+  },
+  {
+    id: 'session',
+    title: 'Sign-in session',
+    subtitle: 'You will need to verify your phone again',
+    icon: 'phone.fill',
+  },
+];
