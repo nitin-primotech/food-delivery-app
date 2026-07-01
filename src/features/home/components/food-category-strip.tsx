@@ -1,11 +1,10 @@
-import { Image } from 'expo-image';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
 import type { Category } from '@/features/catalog/types/catalog.types';
 import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -49,11 +48,12 @@ export function FoodCategoryStrip({
               accessibilityLabel={`Browse ${cat.name}`}
             >
               <View style={styles.tile}>
-                <Image
+                <RemoteImage
                   source={{ uri: imageUri }}
                   style={styles.image}
                   contentFit="cover"
                   transition={200}
+                  recyclingKey={cat.id}
                 />
               </View>
               <Text style={styles.label} numberOfLines={2}>

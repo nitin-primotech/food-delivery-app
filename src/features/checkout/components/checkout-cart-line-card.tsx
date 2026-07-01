@@ -1,6 +1,4 @@
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
 import type { CartItem } from '@/features/catalog/types/catalog.types';
 import {
   deriveDiscountPercent,
@@ -9,6 +7,7 @@ import {
 } from '@/features/checkout/utils/format-currency';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { CartLineStepper } from '@/shared/components/cart-line-stepper';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -50,10 +49,11 @@ export function CheckoutCartLineCard({
   return (
     <View style={styles.card}>
       <View style={styles.topRow}>
-        <Image
+        <RemoteImage
           source={{ uri: line.item.image }}
           style={styles.thumb}
           contentFit="cover"
+          recyclingKey={line.item.id}
         />
         <View style={styles.body}>
           <Text style={styles.name} numberOfLines={2}>

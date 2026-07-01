@@ -1,6 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
-import { StyleSheet, View, type ViewProps } from 'react-native';
+import {
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewProps,
+  type ViewStyle,
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -18,6 +24,18 @@ type ShimmerProps = ViewProps & {
   borderRadius?: number;
 };
 
+function styleFillsParent(style: StyleProp<ViewStyle>): boolean {
+  const flat = StyleSheet.flatten(style);
+  if (!flat) return false;
+  return (
+    flat.position === 'absolute' &&
+    flat.top === 0 &&
+    flat.bottom === 0 &&
+    flat.left === 0 &&
+    flat.right === 0
+  );
+}
+
 export function Shimmer({
   height = 16,
   width = '100%',
@@ -26,6 +44,7 @@ export function Shimmer({
   ...rest
 }: ShimmerProps) {
   const translateX = useSharedValue(-1);
+  const fillsParent = styleFillsParent(style);
 
   useEffect(() => {
     translateX.value = withRepeat(
@@ -36,14 +55,15 @@ export function Shimmer({
   }, [translateX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value * 120 }],
+    transform: [{ translateX: translateX.value * (fillsParent ? 240 : 120) }],
   }));
 
   return (
     <View
       style={[
         styles.base,
-        { height, width, borderRadius, borderCurve: 'continuous' },
+        !fillsParent && { height, width },
+        { borderRadius, borderCurve: 'continuous' },
         style,
       ]}
       {...rest}

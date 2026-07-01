@@ -1,10 +1,9 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
 import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { isHttpImageUrl } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -33,11 +32,12 @@ export function RestaurantTileCard({
         <Link href={`/restaurant/${restaurant.id}`} asChild>
           <Pressable style={styles.imagePressable} accessibilityRole="link">
             {isHttpImageUrl(restaurant.coverImage) ? (
-              <Image
+              <RemoteImage
                 source={{ uri: restaurant.coverImage }}
                 style={styles.image}
                 contentFit="cover"
                 transition={250}
+                recyclingKey={restaurant.id}
               />
             ) : null}
           </Pressable>
@@ -60,11 +60,12 @@ export function RestaurantTileCard({
         <Pressable style={styles.body} accessibilityRole="link">
           <View style={styles.titleRow}>
             {isHttpImageUrl(restaurant.logoImage) ? (
-              <Image
+              <RemoteImage
                 source={{ uri: restaurant.logoImage }}
                 style={styles.logo}
                 contentFit="cover"
                 transition={200}
+                recyclingKey={`${restaurant.id}:logo`}
               />
             ) : null}
             <View style={styles.titleCopy}>

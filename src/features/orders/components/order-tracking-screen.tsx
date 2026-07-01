@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -10,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import type { Order, OrderRider } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import { OrderTrackingTimeline } from '@/features/orders/components/order-tracking-timeline';
@@ -30,6 +28,7 @@ import {
 } from '@/lib/firebase/order-mapper';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { selectOrders, useOrdersStore } from '@/store/orders.store';
 import { colors } from '@/theme/colors';
@@ -70,10 +69,11 @@ function OrderSummaryCard({
             </Text>
           </View>
         </View>
-        <Image
+        <RemoteImage
           source={{ uri: heroImage }}
           style={styles.summaryImage}
           contentFit="cover"
+          recyclingKey={order.id}
         />
       </View>
 
@@ -156,7 +156,7 @@ function DeliveryPartnerCard({ rider }: { rider: OrderRider }) {
   return (
     <View style={styles.partnerCard}>
       {rider.avatar ? (
-        <Image
+        <RemoteImage
           source={{ uri: rider.avatar }}
           style={styles.partnerAvatar}
           contentFit="cover"

@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useEffect } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -13,6 +12,7 @@ import {
   CART_THUMB_SIZE,
   cartThumbStackWidth,
 } from '@/shared/components/cart-thumb-stack';
+import { RemoteImage } from '@/shared/components/remote-image';
 import {
   clearLastAdded,
   selectLastAdded,
@@ -76,7 +76,7 @@ export function CartDropAnimation() {
   return (
     <View style={styles.overlay} pointerEvents="none">
       <Animated.View style={[styles.drop, shadows.card, dropStyle]}>
-        <Image
+        <RemoteImage
           source={{ uri: lastAdded.image }}
           style={styles.image}
           contentFit="cover"

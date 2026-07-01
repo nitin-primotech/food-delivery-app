@@ -1,13 +1,12 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
-
 import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import { isHttpImageUrl } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumText } from '@/shared/components/premium-text';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 
@@ -26,11 +25,12 @@ export function RestaurantCard({ restaurant, index = 0 }: RestaurantCardProps) {
         style={styles.card}
       >
         {isHttpImageUrl(restaurant.coverImage) ? (
-          <Image
+          <RemoteImage
             source={{ uri: restaurant.coverImage }}
             style={styles.cover}
             contentFit="cover"
             transition={300}
+            recyclingKey={restaurant.id}
           />
         ) : null}
         {restaurant.isPromoted ? (
@@ -43,9 +43,10 @@ export function RestaurantCard({ restaurant, index = 0 }: RestaurantCardProps) {
         <View style={styles.body}>
           <View style={styles.row}>
             {isHttpImageUrl(restaurant.logoImage) ? (
-              <Image
+              <RemoteImage
                 source={{ uri: restaurant.logoImage }}
                 style={styles.logo}
+                recyclingKey={`${restaurant.id}:logo`}
               />
             ) : null}
             <View style={styles.meta}>

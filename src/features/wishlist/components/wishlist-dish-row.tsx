@@ -1,13 +1,12 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
 import {
   deriveMrp,
   formatInr,
 } from '@/features/checkout/utils/format-currency';
 import { productDetailPath } from '@/features/product/utils/product-path';
 import { isHttpImageUrl } from '@/lib/firebase/category-images';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { WishlistToggle } from '@/shared/components/wishlist-toggle';
 import type { WishlistProduct } from '@/store/wishlist.store';
 import { colors, shadows } from '@/theme/colors';
@@ -29,10 +28,11 @@ export function WishlistDishRow({ entry }: WishlistDishRowProps) {
         <Pressable style={styles.pressable} accessibilityRole="link">
           <View style={styles.imageWrap}>
             {imageUri ? (
-              <Image
+              <RemoteImage
                 source={{ uri: imageUri }}
                 style={styles.image}
                 contentFit="cover"
+                recyclingKey={item.id}
               />
             ) : (
               <View style={styles.imageFallback} />

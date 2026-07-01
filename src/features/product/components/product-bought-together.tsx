@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type {
@@ -6,6 +5,7 @@ import type {
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticAddToCart, hapticSoftTap } from '@/shared/haptics/feedback';
 import { addToCart } from '@/store/cart.store';
 import { colors } from '@/theme/colors';
@@ -61,10 +61,11 @@ export function ProductBoughtTogether({
               accessibilityRole="button"
               accessibilityLabel={item.name}
             >
-              <Image
+              <RemoteImage
                 source={{ uri: item.image }}
                 style={styles.image}
                 contentFit="cover"
+                recyclingKey={item.id}
               />
               <Text style={styles.name} numberOfLines={2}>
                 {item.name}

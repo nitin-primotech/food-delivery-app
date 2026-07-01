@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRef } from 'react';
 import {
@@ -8,9 +7,9 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-
 import type { Promo } from '@/features/catalog/types/catalog.types';
 import { PremiumText } from '@/shared/components/premium-text';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 
@@ -36,7 +35,11 @@ export function PromoCarousel({ promos }: PromoCarouselProps) {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <Pressable style={[styles.card, shadows.card, { width: cardWidth }]}>
-          <Image source={{ uri: item.image }} style={styles.image} />
+          <RemoteImage
+            source={{ uri: item.image }}
+            style={styles.image}
+            recyclingKey={item.id}
+          />
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.75)']}
             style={styles.gradient}

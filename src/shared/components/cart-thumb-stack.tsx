@@ -1,6 +1,6 @@
-import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInRight, ZoomIn } from 'react-native-reanimated';
+import { RemoteImage } from '@/shared/components/remote-image';
 
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/spacing';
@@ -67,7 +67,7 @@ export function CartThumbStack({ thumbs, highlightId }: CartThumbStackProps) {
               },
             ]}
           >
-            <Image
+            <RemoteImage
               source={{ uri: thumb.image }}
               style={styles.image}
               contentFit="cover"

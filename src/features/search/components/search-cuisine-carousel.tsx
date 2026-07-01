@@ -1,12 +1,11 @@
-import { Image } from 'expo-image';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
 import type {
   Category,
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
 import { countRestaurantsForCategory } from '@/features/search/utils/search-suggestions';
 import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -44,10 +43,11 @@ export function SearchCuisineCarousel({
             accessibilityLabel={`${category.name}, ${count} restaurants`}
           >
             <View style={styles.imageWrap}>
-              <Image
+              <RemoteImage
                 source={{ uri: resolveCategoryImageUri(category.image) }}
                 style={styles.image}
                 contentFit="cover"
+                recyclingKey={category.id}
               />
             </View>
             <Text style={styles.name}>{category.name}</Text>

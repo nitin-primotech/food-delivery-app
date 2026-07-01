@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -10,8 +9,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import {
   clearLastWishlistSaved,
   selectLastWishlistSaved,
@@ -68,7 +67,7 @@ export function WishlistSavedToast() {
         ]}
       >
         <View style={styles.thumbWrap}>
-          <Image
+          <RemoteImage
             source={{ uri: lastSaved.image }}
             style={styles.thumb}
             contentFit="cover"

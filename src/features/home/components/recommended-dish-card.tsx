@@ -1,13 +1,12 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import type { RecommendedDish } from '@/features/home/utils/get-recommended-dishes';
 import { productDetailPath } from '@/features/product/utils/product-path';
 import { AnimatedCartAction } from '@/shared/components/animated-cart-action';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumText } from '@/shared/components/premium-text';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticAddToCart } from '@/shared/haptics/feedback';
 import {
   addToCart,
@@ -53,11 +52,12 @@ export function RecommendedDishCard({ dish, width }: RecommendedDishCardProps) {
       <View style={styles.imageWrap}>
         <Link href={productDetailPath(restaurantId, item.id)} asChild>
           <Pressable style={styles.imagePress}>
-            <Image
+            <RemoteImage
               source={{ uri: item.image }}
               style={styles.image}
               contentFit="cover"
               transition={200}
+              recyclingKey={item.id}
             />
           </Pressable>
         </Link>

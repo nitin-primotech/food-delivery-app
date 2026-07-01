@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import type { RecommendedDish } from '@/features/home/utils/get-recommended-dishes';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumText } from '@/shared/components/premium-text';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticAddToCart } from '@/shared/haptics/feedback';
 import { addToCart } from '@/store/cart.store';
 import { colors, shadows } from '@/theme/colors';
@@ -24,11 +24,12 @@ export function CheckoutUpsellCard({ dish, width }: CheckoutUpsellCardProps) {
 
   return (
     <View style={[styles.card, shadows.soft, { width }]}>
-      <Image
+      <RemoteImage
         source={{ uri: item.image }}
         style={styles.image}
         contentFit="cover"
         transition={200}
+        recyclingKey={item.id}
       />
       <View style={styles.body}>
         <PremiumText

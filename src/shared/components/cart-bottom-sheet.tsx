@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { useMemo } from 'react';
 import {
@@ -10,11 +9,11 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import type { CartItem } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { CartLineStepper } from '@/shared/components/cart-line-stepper';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import {
   closeCartSheet,
@@ -64,10 +63,11 @@ function CartLineRow({
 
   return (
     <View style={styles.line}>
-      <Image
+      <RemoteImage
         source={{ uri: line.item.image }}
         style={styles.thumb}
         contentFit="cover"
+        recyclingKey={line.item.id}
       />
       <View style={styles.lineMain}>
         <View style={styles.lineTop}>

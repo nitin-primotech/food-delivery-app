@@ -1,10 +1,10 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Restaurant } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import { estimatePriceForTwo } from '@/features/search/utils/search-suggestions';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -22,10 +22,11 @@ export function SearchRestaurantRow({ restaurant }: SearchRestaurantRowProps) {
     <Link href={`/restaurant/${restaurant.id}`} asChild>
       <Pressable style={styles.card} accessibilityRole="button">
         <View style={styles.imageWrap}>
-          <Image
+          <RemoteImage
             source={{ uri: image }}
             style={styles.image}
             contentFit="cover"
+            recyclingKey={restaurant.id}
           />
         </View>
 

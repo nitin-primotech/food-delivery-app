@@ -1,9 +1,7 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { DIETARY_OPTIONS } from '@/features/auth/constants/personalization';
 import type { DietaryPreference } from '@/features/auth/types/onboarding.types';
 import { fetchCategories } from '@/features/catalog/api/catalog.api';
@@ -13,6 +11,7 @@ import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { Shimmer } from '@/shared/components/shimmer';
 import { hapticSelection } from '@/shared/haptics/feedback';
 import { savePersonalization, skipPersonalization } from '@/store/app.store';
@@ -140,10 +139,11 @@ export function PersonalizationScreen() {
                     style={[styles.cuisineCard, active && styles.cuisineActive]}
                   >
                     {imageUri ? (
-                      <Image
+                      <RemoteImage
                         source={{ uri: imageUri }}
                         style={styles.cuisineImage}
                         contentFit="cover"
+                        recyclingKey={category.id}
                       />
                     ) : null}
                     <View style={styles.cuisineOverlay} />

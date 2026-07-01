@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo, useState } from 'react';
 import {
@@ -10,8 +9,8 @@ import {
   Text,
   View,
 } from 'react-native';
-
 import { getProductGalleryImages } from '@/features/product/utils/product-gallery';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -68,11 +67,12 @@ export function ProductImageHero({
                 key={`${imageUri}-${index}`}
                 style={[styles.slide, { width: stageWidth }]}
               >
-                <Image
+                <RemoteImage
                   source={{ uri: imageUri }}
                   style={styles.image}
                   contentFit="cover"
                   transition={220}
+                  recyclingKey={imageUri}
                 />
               </View>
             ))}

@@ -1,7 +1,5 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-
 import type { Order } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import {
@@ -12,6 +10,7 @@ import {
   ORDER_STATUS_UI,
 } from '@/features/orders/constants/orders.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -62,11 +61,12 @@ export function OrderListCard({ order }: OrderListCardProps) {
 
       <View style={styles.thumbRow}>
         {visibleItems.map((line) => (
-          <Image
+          <RemoteImage
             key={`${line.restaurantId}:${line.item.id}`}
             source={{ uri: line.item.image }}
             style={styles.thumb}
             contentFit="cover"
+            recyclingKey={`${line.restaurantId}:${line.item.id}`}
           />
         ))}
         {overflow > 0 ? (

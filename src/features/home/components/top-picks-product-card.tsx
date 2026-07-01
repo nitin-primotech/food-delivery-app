@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
@@ -9,6 +8,7 @@ import type { RecommendedDish } from '@/features/home/utils/get-recommended-dish
 import { productDetailPath } from '@/features/product/utils/product-path';
 import { isHttpImageUrl } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { RemoteImage } from '@/shared/components/remote-image';
 import { WishlistToggle } from '@/shared/components/wishlist-toggle';
 import { hapticAddToCart, hapticSoftTap } from '@/shared/haptics/feedback';
 import {
@@ -71,11 +71,12 @@ export function TopPicksProductCard({
         <Link href={productDetailPath(restaurantId, item.id)} asChild>
           <Pressable style={styles.imagePressable} accessibilityRole="link">
             {imageUri ? (
-              <Image
+              <RemoteImage
                 source={{ uri: imageUri }}
                 style={styles.image}
                 contentFit="cover"
                 transition={200}
+                recyclingKey={item.id}
               />
             ) : (
               <View style={styles.imageFallback} />
