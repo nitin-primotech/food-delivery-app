@@ -6,8 +6,9 @@ import { productDetailPath } from '@/features/product/utils/product-path';
 import { AnimatedCartAction } from '@/shared/components/animated-cart-action';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PremiumText } from '@/shared/components/premium-text';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { ProductImage } from '@/shared/components/product-image';
 import { hapticAddToCart } from '@/shared/haptics/feedback';
+import { prefetchRemoteImage } from '@/shared/utils/prefetch-remote-image';
 import {
   addToCart,
   selectCartLineQuantity,
@@ -51,12 +52,15 @@ export function RecommendedDishCard({ dish, width }: RecommendedDishCardProps) {
     <View style={[styles.card, { width }]}>
       <View style={styles.imageWrap}>
         <Link href={productDetailPath(restaurantId, item.id)} asChild>
-          <Pressable style={styles.imagePress}>
-            <RemoteImage
-              source={{ uri: item.image }}
+          <Pressable
+            style={styles.imagePress}
+            onPressIn={() => prefetchRemoteImage(item.image)}
+          >
+            <ProductImage
+              image={item.image}
+              categoryName={item.category}
               style={styles.image}
               contentFit="cover"
-              transition={200}
               recyclingKey={item.id}
             />
           </Pressable>
@@ -74,7 +78,10 @@ export function RecommendedDishCard({ dish, width }: RecommendedDishCardProps) {
 
       <View style={styles.titleRow}>
         <Link href={productDetailPath(restaurantId, item.id)} asChild>
-          <Pressable style={styles.titlePress}>
+          <Pressable
+            style={styles.titlePress}
+            onPressIn={() => prefetchRemoteImage(item.image)}
+          >
             <PremiumText
               variant="bodyMedium"
               color={colors.textPrimary}

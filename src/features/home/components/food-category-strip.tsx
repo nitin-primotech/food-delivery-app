@@ -2,9 +2,8 @@ import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '@/features/catalog/types/catalog.types';
-import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { CategoryImage } from '@/shared/components/category-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -33,35 +32,28 @@ export function FoodCategoryStrip({
         decelerationRate="fast"
         contentContainerStyle={styles.row}
       >
-        {categories.map((cat) => {
-          const imageUri = resolveCategoryImageUri(cat.image);
-          if (!imageUri) {
-            return null;
-          }
-
-          return (
-            <Pressable
-              key={cat.id}
-              style={styles.item}
-              onPress={() => router.push(`/category/${cat.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`Browse ${cat.name}`}
-            >
-              <View style={styles.tile}>
-                <RemoteImage
-                  source={{ uri: imageUri }}
-                  style={styles.image}
-                  contentFit="cover"
-                  transition={200}
-                  recyclingKey={cat.id}
-                />
-              </View>
-              <Text style={styles.label} numberOfLines={2}>
-                {cat.name}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {categories.map((cat) => (
+          <Pressable
+            key={cat.id}
+            style={styles.item}
+            onPress={() => router.push(`/category/${cat.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`Browse ${cat.name}`}
+          >
+            <View style={styles.tile}>
+              <CategoryImage
+                categoryName={cat.name}
+                remoteImage={cat.image}
+                style={styles.image}
+                contentFit="cover"
+                recyclingKey={cat.id}
+              />
+            </View>
+            <Text style={styles.label} numberOfLines={2}>
+              {cat.name}
+            </Text>
+          </Pressable>
+        ))}
 
         <Pressable
           style={styles.item}
@@ -105,7 +97,7 @@ const styles = StyleSheet.create({
     width: TILE_SIZE,
     height: TILE_SIZE,
     borderRadius: TILE_RADIUS,
-    backgroundColor: colors.backgroundElevated,
+    backgroundColor: '#FAF8F5',
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border,

@@ -207,8 +207,8 @@ export function ProductDetailScreen() {
       >
         <View style={styles.hero}>
           <ProductImageHero
-            primaryImage={item.image}
-            relatedImages={relatedItems.map((entry) => entry.image)}
+            image={item.image}
+            categoryName={item.category}
             discountPercent={discount}
           />
 

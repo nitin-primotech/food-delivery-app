@@ -5,7 +5,7 @@ import type {
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
 import { formatInr } from '@/features/checkout/utils/format-currency';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { ProductImage } from '@/shared/components/product-image';
 import { hapticAddToCart, hapticSoftTap } from '@/shared/haptics/feedback';
 import { addToCart } from '@/store/cart.store';
 import { colors } from '@/theme/colors';
@@ -61,8 +61,9 @@ export function ProductBoughtTogether({
               accessibilityRole="button"
               accessibilityLabel={item.name}
             >
-              <RemoteImage
-                source={{ uri: item.image }}
+              <ProductImage
+                image={item.image}
+                categoryName={item.category}
                 style={styles.image}
                 contentFit="cover"
                 recyclingKey={item.id}

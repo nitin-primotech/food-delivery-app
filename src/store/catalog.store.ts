@@ -12,6 +12,7 @@ import {
 } from '@/lib/firebase';
 import { collectInventoryProductImages } from '@/lib/firebase/catalog-images';
 import type { FirestoreMenuItem } from '@/lib/firebase/types';
+import { prefetchRemoteImages } from '@/shared/utils/prefetch-remote-image';
 
 type CatalogState = {
   ready: boolean;
@@ -52,13 +53,16 @@ export function startCatalogSync(): void {
   }
 
   catalogUnsubscribe = subscribeToInventory((items) => {
+    const productImages = collectInventoryProductImages(items);
+
     useCatalogStore.setState({
       items,
       categories: mapInventoryToCategories(items),
       restaurant: mapInventoryToRestaurant(items),
-      productImages: collectInventoryProductImages(items),
+      productImages,
       ready: true,
     });
+    prefetchRemoteImages(productImages);
     markCatalogReady();
   });
 }

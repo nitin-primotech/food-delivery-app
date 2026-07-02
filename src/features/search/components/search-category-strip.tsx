@@ -1,8 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '@/features/catalog/types/catalog.types';
-import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { CategoryImage } from '@/shared/components/category-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -59,8 +58,9 @@ export function SearchCategoryStrip({
             accessibilityLabel={`Search ${category.name}`}
           >
             <View style={[styles.tile, active && styles.tileActive]}>
-              <RemoteImage
-                source={{ uri: resolveCategoryImageUri(category.image) }}
+              <CategoryImage
+                categoryName={category.name}
+                remoteImage={category.image}
                 style={styles.image}
                 contentFit="cover"
                 recyclingKey={category.id}

@@ -6,11 +6,11 @@ import {
 } from '@/features/checkout/utils/format-currency';
 import type { RecommendedDish } from '@/features/home/utils/get-recommended-dishes';
 import { productDetailPath } from '@/features/product/utils/product-path';
-import { isHttpImageUrl } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { ProductImage } from '@/shared/components/product-image';
 import { WishlistToggle } from '@/shared/components/wishlist-toggle';
 import { hapticAddToCart, hapticSoftTap } from '@/shared/haptics/feedback';
+import { prefetchRemoteImage } from '@/shared/utils/prefetch-remote-image';
 import {
   addToCart,
   selectCartLineQuantity,
@@ -44,7 +44,6 @@ export function TopPicksProductCard({
   const { item, restaurantId, restaurantName, rating } = dish;
   const quantity = useCartStore(selectCartLineQuantity(item.id, restaurantId));
   const originalPrice = deriveMrp(item.price);
-  const imageUri = isHttpImageUrl(item.image) ? item.image : undefined;
 
   function handleAdd() {
     hapticAddToCart();
@@ -69,18 +68,18 @@ export function TopPicksProductCard({
     <View style={[styles.card, flush && styles.cardFlush, { width }]}>
       <View style={styles.imageWrap}>
         <Link href={productDetailPath(restaurantId, item.id)} asChild>
-          <Pressable style={styles.imagePressable} accessibilityRole="link">
-            {imageUri ? (
-              <RemoteImage
-                source={{ uri: imageUri }}
-                style={styles.image}
-                contentFit="cover"
-                transition={200}
-                recyclingKey={item.id}
-              />
-            ) : (
-              <View style={styles.imageFallback} />
-            )}
+          <Pressable
+            style={styles.imagePressable}
+            accessibilityRole="link"
+            onPressIn={() => prefetchRemoteImage(item.image)}
+          >
+            <ProductImage
+              image={item.image}
+              categoryName={item.category}
+              style={styles.image}
+              contentFit="cover"
+              recyclingKey={item.id}
+            />
           </Pressable>
         </Link>
         <WishlistToggle
@@ -177,7 +176,10 @@ const styles = StyleSheet.create({
   imageWrap: {
     width: '100%',
     height: IMAGE_HEIGHT,
-    backgroundColor: colors.backgroundMuted,
+    backgroundColor: '#F8F5F1',
+    borderRadius: radius.md,
+    borderCurve: 'continuous',
+    overflow: 'hidden',
   },
   imagePressable: {
     width: '100%',

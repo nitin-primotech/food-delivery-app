@@ -5,8 +5,7 @@ import {
   formatInr,
 } from '@/features/checkout/utils/format-currency';
 import { productDetailPath } from '@/features/product/utils/product-path';
-import { isHttpImageUrl } from '@/lib/firebase/category-images';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { ProductImage } from '@/shared/components/product-image';
 import { WishlistToggle } from '@/shared/components/wishlist-toggle';
 import type { WishlistProduct } from '@/store/wishlist.store';
 import { colors, shadows } from '@/theme/colors';
@@ -20,23 +19,19 @@ type WishlistDishRowProps = {
 export function WishlistDishRow({ entry }: WishlistDishRowProps) {
   const { item, restaurantId, restaurantName, rating } = entry;
   const mrp = deriveMrp(item.price);
-  const imageUri = isHttpImageUrl(item.image) ? item.image : undefined;
 
   return (
     <View style={[styles.card, shadows.soft]}>
       <Link href={productDetailPath(restaurantId, item.id)} asChild>
         <Pressable style={styles.pressable} accessibilityRole="link">
           <View style={styles.imageWrap}>
-            {imageUri ? (
-              <RemoteImage
-                source={{ uri: imageUri }}
-                style={styles.image}
-                contentFit="cover"
-                recyclingKey={item.id}
-              />
-            ) : (
-              <View style={styles.imageFallback} />
-            )}
+            <ProductImage
+              image={item.image}
+              categoryName={item.category}
+              style={styles.image}
+              contentFit="cover"
+              recyclingKey={item.id}
+            />
           </View>
 
           <View style={styles.body}>

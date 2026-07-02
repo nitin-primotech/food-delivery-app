@@ -4,8 +4,7 @@ import type {
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
 import { countRestaurantsForCategory } from '@/features/search/utils/search-suggestions';
-import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { CategoryImage } from '@/shared/components/category-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -43,8 +42,9 @@ export function SearchCuisineCarousel({
             accessibilityLabel={`${category.name}, ${count} restaurants`}
           >
             <View style={styles.imageWrap}>
-              <RemoteImage
-                source={{ uri: resolveCategoryImageUri(category.image) }}
+              <CategoryImage
+                categoryName={category.name}
+                remoteImage={category.image}
                 style={styles.image}
                 contentFit="cover"
                 recyclingKey={category.id}

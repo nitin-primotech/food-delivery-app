@@ -59,6 +59,9 @@ function FoodGallery() {
               source={card.source}
               style={styles.galleryImage}
               contentFit="contain"
+              cachePolicy="memory-disk"
+              priority="high"
+              transition={150}
             />
           </View>
         </View>

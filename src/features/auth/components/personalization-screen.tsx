@@ -6,15 +6,18 @@ import { DIETARY_OPTIONS } from '@/features/auth/constants/personalization';
 import type { DietaryPreference } from '@/features/auth/types/onboarding.types';
 import { fetchCategories } from '@/features/catalog/api/catalog.api';
 import type { Category } from '@/features/catalog/types/catalog.types';
-import { resolveCategoryImageUri } from '@/lib/firebase/category-images';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { CategoryImage } from '@/shared/components/category-image';
 import { PremiumButton } from '@/shared/components/premium-button';
 import { PremiumText } from '@/shared/components/premium-text';
-import { RemoteImage } from '@/shared/components/remote-image';
 import { Shimmer } from '@/shared/components/shimmer';
 import { hapticSelection } from '@/shared/haptics/feedback';
 import { savePersonalization, skipPersonalization } from '@/store/app.store';
+import {
+  selectCatalogCategories,
+  useCatalogStore,
+} from '@/store/catalog.store';
 import { colors, shadows } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -42,7 +45,15 @@ export function PersonalizationScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
+  const cachedCategories = useCatalogStore(selectCatalogCategories);
+
   useEffect(() => {
+    if (cachedCategories.length > 0) {
+      setCategories(cachedCategories);
+      setLoadingCategories(false);
+      return;
+    }
+
     const controller = new AbortController();
 
     fetchCategories(controller.signal)
@@ -51,7 +62,7 @@ export function PersonalizationScreen() {
       .finally(() => setLoadingCategories(false));
 
     return () => controller.abort();
-  }, []);
+  }, [cachedCategories]);
 
   function toggleCategory(id: string) {
     hapticSelection();
@@ -127,45 +138,41 @@ export function PersonalizationScreen() {
           </PremiumText>
         ) : (
           <View style={styles.cuisineGrid}>
-            {categories
-              .filter((category) => resolveCategoryImageUri(category.image))
-              .map((category) => {
-                const imageUri = resolveCategoryImageUri(category.image);
-                const active = selectedCategories.includes(category.id);
-                return (
-                  <Pressable
-                    key={category.id}
-                    onPress={() => toggleCategory(category.id)}
-                    style={[styles.cuisineCard, active && styles.cuisineActive]}
-                  >
-                    {imageUri ? (
-                      <RemoteImage
-                        source={{ uri: imageUri }}
-                        style={styles.cuisineImage}
-                        contentFit="cover"
-                        recyclingKey={category.id}
+            {categories.map((category) => {
+              const active = selectedCategories.includes(category.id);
+              return (
+                <Pressable
+                  key={category.id}
+                  onPress={() => toggleCategory(category.id)}
+                  style={[styles.cuisineCard, active && styles.cuisineActive]}
+                >
+                  <CategoryImage
+                    categoryName={category.name}
+                    remoteImage={category.image}
+                    style={styles.cuisineImage}
+                    contentFit="cover"
+                    recyclingKey={category.id}
+                  />
+                  <View style={styles.cuisineOverlay} />
+                  {active ? (
+                    <View style={styles.checkBadge}>
+                      <AppSymbol
+                        name="checkmark.circle.fill"
+                        size={28}
+                        tintColor={colors.textInverse}
                       />
-                    ) : null}
-                    <View style={styles.cuisineOverlay} />
-                    {active ? (
-                      <View style={styles.checkBadge}>
-                        <AppSymbol
-                          name="checkmark.circle.fill"
-                          size={28}
-                          tintColor={colors.textInverse}
-                        />
-                      </View>
-                    ) : null}
-                    <PremiumText
-                      variant="captionMedium"
-                      color={colors.textInverse}
-                      style={styles.cuisineLabel}
-                    >
-                      {category.name}
-                    </PremiumText>
-                  </Pressable>
-                );
-              })}
+                    </View>
+                  ) : null}
+                  <PremiumText
+                    variant="captionMedium"
+                    color={colors.textInverse}
+                    style={styles.cuisineLabel}
+                  >
+                    {category.name}
+                  </PremiumText>
+                </Pressable>
+              );
+            })}
           </View>
         )}
 
@@ -296,6 +303,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
     borderCurve: 'continuous',
+    backgroundColor: '#FAF8F5',
   },
   cuisineActive: {
     borderColor: colors.primary,

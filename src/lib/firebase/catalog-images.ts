@@ -3,7 +3,10 @@ import type {
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
 
-import { isHttpImageUrl } from '@/lib/firebase/category-images';
+import {
+  isDisplayableImageUrl,
+  isHttpImageUrl,
+} from '@/lib/firebase/category-images';
 import type { FirestoreMenuItem } from '@/lib/firebase/types';
 
 export function collectProductImageUrls(
@@ -124,7 +127,7 @@ export function resolveMenuItemImage(
   item: FirestoreMenuItem,
   categoryImageByName: Map<string, string>,
 ): string {
-  if (isHttpImageUrl(item.image)) {
+  if (isDisplayableImageUrl(item.image)) {
     return item.image;
   }
   return categoryImageByName.get(item.category) ?? '';
@@ -149,6 +152,7 @@ export function mapMenuItemFromFirestore(
     description: item.description ?? '',
     price: item.price,
     image: resolveMenuItemImage(item, categoryImageByName),
+    category: item.category,
     isVegetarian: item.foodType === 'veg',
     isPopular: false,
   };

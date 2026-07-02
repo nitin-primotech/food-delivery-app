@@ -1,16 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useMemo, useState } from 'react';
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { getProductGalleryImages } from '@/features/product/utils/product-gallery';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+
+import { ProductImage } from '@/shared/components/product-image';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -19,27 +10,17 @@ const STAGE_HEIGHT = 248;
 const H_PAD = spacing.lg;
 
 type ProductImageHeroProps = {
-  primaryImage: string;
-  relatedImages: string[];
+  image?: string;
+  categoryName?: string;
   discountPercent?: number;
 };
 
 export function ProductImageHero({
-  primaryImage,
-  relatedImages,
+  image,
+  categoryName,
   discountPercent = 0,
 }: ProductImageHeroProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
   const stageWidth = Dimensions.get('window').width - H_PAD * 2;
-  const images = useMemo(
-    () => getProductGalleryImages(primaryImage, relatedImages, 3),
-    [primaryImage, relatedImages],
-  );
-
-  function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
-    const index = Math.round(event.nativeEvent.contentOffset.x / stageWidth);
-    setActiveIndex(index);
-  }
 
   return (
     <View style={styles.wrap}>
@@ -51,33 +32,16 @@ export function ProductImageHero({
           style={StyleSheet.absoluteFill}
         />
 
-        {images.length > 0 ? (
-          <ScrollView
-            style={styles.galleryScroll}
-            horizontal
-            pagingEnabled
-            nestedScrollEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={handleScroll}
-            decelerationRate="fast"
-            contentContainerStyle={styles.galleryRow}
-          >
-            {images.map((imageUri, index) => (
-              <View
-                key={`${imageUri}-${index}`}
-                style={[styles.slide, { width: stageWidth }]}
-              >
-                <RemoteImage
-                  source={{ uri: imageUri }}
-                  style={styles.image}
-                  contentFit="cover"
-                  transition={220}
-                  recyclingKey={imageUri}
-                />
-              </View>
-            ))}
-          </ScrollView>
-        ) : null}
+        <View style={styles.imageFrame}>
+          <ProductImage
+            image={image}
+            categoryName={categoryName}
+            style={styles.image}
+            contentFit="cover"
+            priority="high"
+            recyclingKey={image ?? categoryName ?? 'product-hero'}
+          />
+        </View>
 
         {discountPercent > 0 ? (
           <View style={styles.discountBadge}>
@@ -85,20 +49,6 @@ export function ProductImageHero({
           </View>
         ) : null}
       </View>
-
-      {images.length > 1 ? (
-        <View style={styles.dots}>
-          {images.map((imageUri, index) => (
-            <View
-              key={`dot-${imageUri}-${index}`}
-              style={[
-                styles.dot,
-                index === activeIndex ? styles.dotActive : null,
-              ]}
-            />
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -106,27 +56,19 @@ export function ProductImageHero({
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    gap: spacing.sm,
   },
   stage: {
     height: STAGE_HEIGHT,
     borderRadius: 18,
     borderCurve: 'continuous',
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 0,
     backgroundColor: '#FFFDFB',
     boxShadow: '0 10px 28px rgba(28, 28, 30, 0.08)',
   },
-  galleryScroll: {
-    ...StyleSheet.absoluteFill,
-  },
-  galleryRow: {
-    height: STAGE_HEIGHT,
-  },
-  slide: {
-    height: STAGE_HEIGHT,
-    overflow: 'hidden',
+  imageFrame: {
+    flex: 1,
+    padding: 0,
   },
   image: {
     width: '100%',
@@ -147,22 +89,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
     color: colors.textInverse,
-  },
-  dots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.borderStrong,
-  },
-  dotActive: {
-    width: 18,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.textSecondary,
   },
 });

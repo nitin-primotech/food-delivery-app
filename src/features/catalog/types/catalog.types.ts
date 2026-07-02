@@ -11,6 +11,7 @@ export type MenuItem = {
   description: string;
   price: number;
   image: string;
+  category?: string;
   isPopular?: boolean;
   isVegetarian?: boolean;
   calories?: number;
