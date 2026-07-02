@@ -73,13 +73,15 @@ function RemoteImageFrame({
   transition = 220,
   recyclingKey,
   cachePolicy = DEFAULT_CACHE_POLICY,
+  placeholder,
+  placeholderContentFit,
   ...rest
 }: RemoteImageFrameProps) {
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [retryAttempt, setRetryAttempt] = useState(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const borderRadius = readBorderRadius(style);
-  const showSkeleton = status === 'loading';
+  const showSkeleton = status === 'loading' && placeholder == null;
   const showFallback = status === 'error';
 
   useEffect(() => {
@@ -132,6 +134,8 @@ function RemoteImageFrame({
         <Image
           key={`${imageUri}:${retryAttempt}`}
           source={source}
+          placeholder={placeholder}
+          placeholderContentFit={placeholderContentFit}
           style={StyleSheet.absoluteFill}
           transition={transition}
           recyclingKey={recyclingKey}
@@ -179,8 +183,8 @@ function RemoteImageFrame({
 }
 
 /**
- * Remote HTTP(S) images show a same-size shimmer until loaded.
- * Retries rate-limited / transient failures with backoff.
+ * Images show a same-size shimmer until loaded.
+ * Remote HTTP(S) URLs retry rate-limited / transient failures with backoff.
  * Pass a stable `recyclingKey` per list/grid cell on Android (e.g. product id).
  */
 export function RemoteImage({
@@ -192,25 +196,17 @@ export function RemoteImage({
   ...rest
 }: RemoteImageProps) {
   const imageUri = useMemo(() => getImageUri(source), [source]);
-  const isRemote = isHttpImageUrl(imageUri);
-
-  if (!isRemote || !imageUri) {
-    return (
-      <Image
-        source={source}
-        style={style}
-        transition={transition}
-        recyclingKey={recyclingKey}
-        cachePolicy={cachePolicy}
-        {...rest}
-      />
+  const frameKey =
+    imageUri ??
+    buildImageRecyclingKey(
+      recyclingKey,
+      typeof source === 'number' ? String(source) : undefined,
     );
-  }
 
   return (
     <RemoteImageFrame
-      key={imageUri}
-      imageUri={imageUri}
+      key={isHttpImageUrl(imageUri) ? `${imageUri}` : frameKey}
+      imageUri={frameKey}
       source={source}
       style={style}
       transition={transition}

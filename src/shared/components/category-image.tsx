@@ -1,6 +1,7 @@
-import { Image, type ImageProps } from 'expo-image';
+import { type ImageProps } from 'expo-image';
 
 import { resolveCategoryImageSource } from '@/lib/firebase/category-local-images';
+import { RemoteImage } from '@/shared/components/remote-image';
 
 type CategoryImageProps = Omit<ImageProps, 'source'> & {
   categoryName: string;
@@ -17,11 +18,13 @@ export function CategoryImage({
   ...rest
 }: CategoryImageProps) {
   return (
-    <Image
+    <RemoteImage
       source={resolveCategoryImageSource(categoryName)}
       style={style}
       contentFit={contentFit}
       transition={transition}
+      cachePolicy="memory-disk"
+      priority="high"
       recyclingKey={recyclingKey ?? categoryName}
       {...rest}
     />

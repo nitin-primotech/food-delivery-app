@@ -12,6 +12,7 @@ import { FloatingCartBar } from '@/shared/components/floating-cart-bar';
 import { ProfileSavedToast } from '@/shared/components/profile-saved-toast';
 import { WishlistSavedToast } from '@/shared/components/wishlist-saved-toast';
 import { preloadAppHaptics } from '@/shared/haptics/feedback';
+import { prefetchCategoryImages } from '@/shared/utils/prefetch-category-images';
 import {
   hydrateAppProfile,
   selectOnboardingComplete,
@@ -46,6 +47,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     preloadAppHaptics();
+    prefetchCategoryImages();
     void Promise.all([hydrateAuthState(), hydrateAppProfile()]);
   }, []);
 
