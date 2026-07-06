@@ -240,6 +240,8 @@ export type DeleteAccountImpact = {
   icon: string;
 };
 
+export const DELETE_ACCOUNT_CONFIRMATION_TEXT = 'DELETE';
+
 export const DELETE_ACCOUNT_IMPACT: DeleteAccountImpact[] = [
   {
     id: 'profile',

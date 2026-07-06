@@ -11,21 +11,13 @@ import {
   PROFILE_QUICK_STATS,
   profileInitials,
 } from '@/features/profile/constants/profile.constants';
+import { logoutUser } from '@/features/profile/services/logout-user';
 import { AppConfirmModal } from '@/shared/components/app-confirm-modal';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
-import {
-  resetAppProfile,
-  selectAddress,
-  selectUserName,
-  useAppStore,
-} from '@/store/app.store';
-import {
-  clearAuthState,
-  selectUserPhone,
-  useAuthStore,
-} from '@/store/auth.store';
+import { selectAddress, selectUserName, useAppStore } from '@/store/app.store';
+import { selectUserPhone, useAuthStore } from '@/store/auth.store';
 import {
   openCartSheet,
   selectCartItemCount,
@@ -62,8 +54,7 @@ export function ProfileScreen() {
 
   async function performLogout() {
     setLogoutModalVisible(false);
-    await clearAuthState();
-    await resetAppProfile();
+    await logoutUser();
     router.replace('/(auth)/welcome');
   }
 

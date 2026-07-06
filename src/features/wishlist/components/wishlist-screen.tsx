@@ -1,11 +1,13 @@
 import { useRouter, useSegments } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { WishlistDishRow } from '@/features/wishlist/components/wishlist-dish-row';
 import { WishlistExploreBanner } from '@/features/wishlist/components/wishlist-explore-banner';
+import { WishlistManageModal } from '@/features/wishlist/components/wishlist-manage-modal';
 import { WishlistSummaryCard } from '@/features/wishlist/components/wishlist-summary-card';
+import { AppConfirmModal } from '@/shared/components/app-confirm-modal';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
@@ -39,6 +41,38 @@ export function WishlistScreen({ showBack }: WishlistScreenProps) {
   const canGoBack = showBack ?? !isTabScreen;
 
   const [isManaging, setIsManaging] = useState(false);
+  const [manageModalVisible, setManageModalVisible] = useState(false);
+  const [clearModalVisible, setClearModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (dishes.length === 0) {
+      setIsManaging(false);
+    }
+  }, [dishes.length]);
+
+  function handleManagePress() {
+    if (isManaging) {
+      setIsManaging(false);
+      return;
+    }
+    setManageModalVisible(true);
+  }
+
+  function handleEditList() {
+    setManageModalVisible(false);
+    setIsManaging(true);
+  }
+
+  function handleClearAllRequest() {
+    setManageModalVisible(false);
+    setClearModalVisible(true);
+  }
+
+  function handleClearAll() {
+    clearWishlist();
+    setIsManaging(false);
+    setClearModalVisible(false);
+  }
 
   function onBack() {
     hapticSoftTap();
@@ -121,8 +155,7 @@ export function WishlistScreen({ showBack }: WishlistScreenProps) {
         <WishlistSummaryCard
           totalCount={dishes.length}
           isManaging={isManaging}
-          onManagePress={() => setIsManaging((value) => !value)}
-          onClearPress={clearWishlist}
+          onManagePress={handleManagePress}
         />
 
         <View style={styles.list}>
@@ -143,6 +176,7 @@ export function WishlistScreen({ showBack }: WishlistScreenProps) {
               <WishlistDishRow
                 key={`${entry.restaurantId}-${entry.item.id}`}
                 entry={entry}
+                isManaging={isManaging}
               />
             ))
           )}
@@ -150,6 +184,24 @@ export function WishlistScreen({ showBack }: WishlistScreenProps) {
 
         <WishlistExploreBanner onExplore={onExplore} />
       </ScrollView>
+
+      <WishlistManageModal
+        visible={manageModalVisible}
+        onClose={() => setManageModalVisible(false)}
+        onEditList={handleEditList}
+        onClearAll={handleClearAllRequest}
+      />
+
+      <AppConfirmModal
+        visible={clearModalVisible}
+        title="Clear wishlist?"
+        message="All saved dishes will be removed from your wishlist."
+        confirmLabel="Clear all"
+        icon="trash"
+        destructive
+        onClose={() => setClearModalVisible(false)}
+        onConfirm={handleClearAll}
+      />
     </View>
   );
 }

@@ -4,7 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import { formatProfilePhone } from '@/features/profile/constants/profile.constants';
-import { DELETE_ACCOUNT_IMPACT } from '@/features/profile/constants/profile-hub.constants';
+import {
+  DELETE_ACCOUNT_CONFIRMATION_TEXT,
+  DELETE_ACCOUNT_IMPACT,
+} from '@/features/profile/constants/profile-hub.constants';
 import { deleteUserAccount } from '@/features/profile/services/delete-account';
 import { AppConfirmModal } from '@/shared/components/app-confirm-modal';
 import { AppSymbol } from '@/shared/components/app-symbol';
@@ -121,6 +124,7 @@ export function DeleteProfileScreen() {
         confirmLabel="Delete account"
         icon="trash"
         destructive
+        requiredConfirmationText={DELETE_ACCOUNT_CONFIRMATION_TEXT}
         onClose={() => setConfirmVisible(false)}
         onConfirm={() => {
           void handleDelete();

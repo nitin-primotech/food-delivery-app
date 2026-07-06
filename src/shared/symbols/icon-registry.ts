@@ -33,6 +33,7 @@ export const ICON_REGISTRY: Record<string, CrossPlatformSymbol> = {
   sparkles: icon('sparkles', 'auto_awesome'),
   plus: icon('plus', 'add'),
   minus: icon('minus', 'remove'),
+  pencil: icon('pencil', 'edit'),
   trash: icon('trash', 'delete'),
   tray: icon('tray', 'inbox'),
   'wifi.exclamationmark': icon('wifi.exclamationmark', 'wifi_off'),

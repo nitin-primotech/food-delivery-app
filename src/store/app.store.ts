@@ -141,6 +141,8 @@ export async function resetAppProfile() {
     hasConfirmedAddress: false,
     address: DEFAULT_PROFILE.address,
     preferences: DEFAULT_PREFERENCES,
+    recentSearches: ['Biryani', 'Paratha', 'Paneer'],
+    profileSavedToken: null,
   });
 }
 

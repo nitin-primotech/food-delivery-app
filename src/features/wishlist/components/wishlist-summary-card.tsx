@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
@@ -10,30 +10,18 @@ type WishlistSummaryCardProps = {
   totalCount: number;
   isManaging: boolean;
   onManagePress: () => void;
-  onClearPress: () => void;
 };
 
 export function WishlistSummaryCard({
   totalCount,
   isManaging,
   onManagePress,
-  onClearPress,
 }: WishlistSummaryCardProps) {
+  const showManage = totalCount > 0;
+
   function handleManage() {
     hapticSoftTap();
-    if (isManaging) {
-      onManagePress();
-      return;
-    }
-    Alert.alert('Manage wishlist', 'Choose an action', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Edit list', onPress: onManagePress },
-      {
-        text: 'Clear all',
-        style: 'destructive',
-        onPress: onClearPress,
-      },
-    ]);
+    onManagePress();
   }
 
   return (
@@ -45,22 +33,26 @@ export function WishlistSummaryCard({
         <Text style={styles.count}>
           {totalCount} {totalCount === 1 ? 'Item' : 'Items'}
         </Text>
-        <Text style={styles.subtitle}>Saved dishes</Text>
-      </View>
-      <Pressable
-        onPress={handleManage}
-        style={[styles.manageBtn, isManaging && styles.manageBtnActive]}
-        accessibilityRole="button"
-        accessibilityLabel={
-          isManaging ? 'Done managing wishlist' : 'Manage wishlist'
-        }
-      >
-        <Text
-          style={[styles.manageText, isManaging && styles.manageTextActive]}
-        >
-          {isManaging ? 'Done' : 'Manage'}
+        <Text style={styles.subtitle}>
+          {isManaging ? 'Tap remove to delete items' : 'Saved dishes'}
         </Text>
-      </Pressable>
+      </View>
+      {showManage ? (
+        <Pressable
+          onPress={handleManage}
+          style={[styles.manageBtn, isManaging && styles.manageBtnActive]}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isManaging ? 'Done managing wishlist' : 'Manage wishlist'
+          }
+        >
+          <Text
+            style={[styles.manageText, isManaging && styles.manageTextActive]}
+          >
+            {isManaging ? 'Done' : 'Manage'}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

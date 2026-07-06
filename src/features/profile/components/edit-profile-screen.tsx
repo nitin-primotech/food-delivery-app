@@ -4,13 +4,13 @@ import {
   Alert,
   Keyboard,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
+import { editProfileStyles as styles } from '@/features/profile/constants/edit-profile.styles';
 import { formatProfilePhone } from '@/features/profile/constants/profile.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PROFILE_SAVED_NAV_DELAY_MS } from '@/shared/components/profile-saved-toast';
@@ -26,8 +26,6 @@ import {
 } from '@/store/app.store';
 import { selectUserPhone, useAuthStore } from '@/store/auth.store';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
-import { fonts } from '@/theme/typography';
 
 export function EditProfileScreen() {
   const router = useRouter();
@@ -169,122 +167,3 @@ export function EditProfileScreen() {
     </ProfileSubScreenShell>
   );
 }
-
-const styles = StyleSheet.create({
-  avatarWrap: {
-    alignSelf: 'center',
-    width: 88,
-    height: 88,
-    marginBottom: spacing.xs,
-    position: 'relative',
-  },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: 'rgba(212, 84, 60, 0.1)',
-    borderWidth: 2,
-    borderColor: 'rgba(212, 84, 60, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitials: {
-    fontFamily: fonts.bold,
-    fontSize: 28,
-    lineHeight: 34,
-    color: colors.primary,
-  },
-  avatarIcon: {
-    position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    lineHeight: 16,
-    color: colors.textSecondary,
-    marginLeft: spacing.xxs,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.backgroundMuted,
-    borderRadius: 14,
-    borderCurve: 'continuous',
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: 52,
-  },
-  inputRowDisabled: {
-    opacity: 0.92,
-  },
-  input: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.textPrimary,
-    paddingVertical: 0,
-  },
-  readOnlyText: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.textPrimary,
-  },
-  verifiedPill: {
-    backgroundColor: colors.successLight,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  verifiedPillText: {
-    fontFamily: fonts.semibold,
-    fontSize: 10,
-    lineHeight: 12,
-    color: colors.success,
-  },
-  saveBtn: {
-    marginTop: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    borderCurve: 'continuous',
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  saveBtnDisabled: {
-    opacity: 0.45,
-  },
-  saveBtnText: {
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-    lineHeight: 19,
-    color: colors.textInverse,
-  },
-  secondaryBtn: {
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  secondaryBtnText: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    lineHeight: 16,
-    color: colors.primary,
-  },
-});

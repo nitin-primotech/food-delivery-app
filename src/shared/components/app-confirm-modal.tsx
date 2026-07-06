@@ -1,7 +1,20 @@
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
+import {
+  formTextInputProps,
+  keyboardAvoidingBehavior,
+} from '@/shared/utils/keyboard';
 import { colors } from '@/theme/colors';
 import { radius, spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -14,6 +27,8 @@ type AppConfirmModalProps = {
   cancelLabel?: string;
   icon?: string;
   destructive?: boolean;
+  /** When set, the user must type this exact string to enable confirmation. */
+  requiredConfirmationText?: string;
   onConfirm: () => void;
   onClose: () => void;
 };
@@ -26,13 +41,25 @@ export function AppConfirmModal({
   cancelLabel = 'Cancel',
   icon,
   destructive = false,
+  requiredConfirmationText,
   onConfirm,
   onClose,
 }: AppConfirmModalProps) {
+  const [confirmationInput, setConfirmationInput] = useState('');
   const accentColor = destructive ? colors.danger : colors.primary;
   const iconBackground = destructive
     ? colors.dangerLight
     : 'rgba(212, 84, 60, 0.1)';
+  const requiresTypedConfirmation = Boolean(requiredConfirmationText);
+  const canConfirm =
+    !requiresTypedConfirmation ||
+    confirmationInput === requiredConfirmationText;
+
+  useEffect(() => {
+    if (!visible) {
+      setConfirmationInput('');
+    }
+  }, [visible]);
 
   function handleClose() {
     hapticSoftTap();
@@ -40,6 +67,7 @@ export function AppConfirmModal({
   }
 
   function handleConfirm() {
+    if (!canConfirm) return;
     hapticSoftTap();
     onConfirm();
   }
@@ -51,46 +79,84 @@ export function AppConfirmModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable
-          style={styles.card}
-          onPress={(event) => event.stopPropagation()}
-        >
-          {icon ? (
-            <View
-              style={[styles.iconWrap, { backgroundColor: iconBackground }]}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={keyboardAvoidingBehavior}
+      >
+        <Pressable style={styles.backdrop} onPress={handleClose}>
+          <Pressable
+            style={styles.card}
+            onPress={(event) => event.stopPropagation()}
+          >
+            {icon ? (
+              <View
+                style={[styles.iconWrap, { backgroundColor: iconBackground }]}
+              >
+                <AppSymbol name={icon} size={22} tintColor={accentColor} />
+              </View>
+            ) : null}
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.subtitle}>{message}</Text>
+            {requiresTypedConfirmation ? (
+              <View style={styles.confirmationField}>
+                <Text style={styles.confirmationLabel}>
+                  Type{' '}
+                  <Text style={styles.confirmationKeyword}>
+                    {requiredConfirmationText}
+                  </Text>{' '}
+                  to confirm
+                </Text>
+                <TextInput
+                  value={confirmationInput}
+                  onChangeText={setConfirmationInput}
+                  placeholder={requiredConfirmationText}
+                  placeholderTextColor={colors.textTertiary}
+                  style={styles.confirmationInput}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoComplete="off"
+                  spellCheck={false}
+                  returnKeyType="done"
+                  onSubmitEditing={handleConfirm}
+                  selectionColor={accentColor}
+                  accessibilityLabel={`Type ${requiredConfirmationText} to confirm`}
+                  {...formTextInputProps}
+                />
+              </View>
+            ) : null}
+            <Pressable
+              style={[
+                styles.confirmBtn,
+                destructive ? styles.confirmBtnDestructive : null,
+                !canConfirm ? styles.confirmBtnDisabled : null,
+              ]}
+              onPress={handleConfirm}
+              disabled={!canConfirm}
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
+              accessibilityState={{ disabled: !canConfirm }}
             >
-              <AppSymbol name={icon} size={22} tintColor={accentColor} />
-            </View>
-          ) : null}
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{message}</Text>
-          <Pressable
-            style={[
-              styles.confirmBtn,
-              destructive ? styles.confirmBtnDestructive : null,
-            ]}
-            onPress={handleConfirm}
-            accessibilityRole="button"
-            accessibilityLabel={confirmLabel}
-          >
-            <Text style={styles.confirmBtnText}>{confirmLabel}</Text>
-          </Pressable>
-          <Pressable
-            style={styles.cancelBtn}
-            onPress={handleClose}
-            accessibilityRole="button"
-            accessibilityLabel={cancelLabel}
-          >
-            <Text style={styles.cancelBtnText}>{cancelLabel}</Text>
+              <Text style={styles.confirmBtnText}>{confirmLabel}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.cancelBtn}
+              onPress={handleClose}
+              accessibilityRole="button"
+              accessibilityLabel={cancelLabel}
+            >
+              <Text style={styles.cancelBtnText}>{cancelLabel}</Text>
+            </Pressable>
           </Pressable>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoid: {
+    flex: 1,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: colors.overlay,
@@ -134,6 +200,39 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.sm,
   },
+  confirmationField: {
+    width: '100%',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  confirmationLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    lineHeight: 15,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  confirmationKeyword: {
+    fontFamily: fonts.bold,
+    color: colors.danger,
+    letterSpacing: 0.4,
+  },
+  confirmationInput: {
+    width: '100%',
+    minHeight: 44,
+    borderRadius: radius.md,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.md,
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    lineHeight: 18,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    letterSpacing: 1.2,
+  },
   confirmBtn: {
     width: '100%',
     backgroundColor: colors.primary,
@@ -145,6 +244,9 @@ const styles = StyleSheet.create({
   },
   confirmBtnDestructive: {
     backgroundColor: colors.danger,
+  },
+  confirmBtnDisabled: {
+    opacity: 0.45,
   },
   confirmBtnText: {
     fontFamily: fonts.semibold,
