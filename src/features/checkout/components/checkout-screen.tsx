@@ -159,7 +159,7 @@ export function CheckoutScreen() {
     if (merchantOffline) {
       Alert.alert(
         'Restaurant offline',
-        'This restaurant is not accepting orders right now. Please try again later.',
+        'This kitchen is not accepting orders right now. Please try again later.',
       );
       return;
     }

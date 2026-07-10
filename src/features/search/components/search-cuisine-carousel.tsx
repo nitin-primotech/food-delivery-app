@@ -3,7 +3,7 @@ import type {
   Category,
   Restaurant,
 } from '@/features/catalog/types/catalog.types';
-import { countRestaurantsForCategory } from '@/features/search/utils/search-suggestions';
+import { getCategoryDishes } from '@/features/category/utils/get-category-dishes';
 import { CategoryImage } from '@/shared/components/category-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
@@ -29,7 +29,8 @@ export function SearchCuisineCarousel({
       contentContainerStyle={styles.row}
     >
       {categories.map((category) => {
-        const count = countRestaurantsForCategory(restaurants, category.id);
+        const count = getCategoryDishes(restaurants, category.id).length;
+        const countLabel = count === 1 ? '1 dish' : `${count} dishes`;
         return (
           <Pressable
             key={category.id}
@@ -39,7 +40,7 @@ export function SearchCuisineCarousel({
               onSelect(category);
             }}
             accessibilityRole="button"
-            accessibilityLabel={`${category.name}, ${count} restaurants`}
+            accessibilityLabel={`${category.name}, ${countLabel}`}
           >
             <View style={styles.imageWrap}>
               <CategoryImage
@@ -51,7 +52,7 @@ export function SearchCuisineCarousel({
               />
             </View>
             <Text style={styles.name}>{category.name}</Text>
-            <Text style={styles.count}>{count} restaurants</Text>
+            <Text style={styles.count}>{countLabel}</Text>
           </Pressable>
         );
       })}

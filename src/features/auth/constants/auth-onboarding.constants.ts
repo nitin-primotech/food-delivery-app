@@ -29,11 +29,11 @@ export const PHONE_ONBOARDING_COPY: AuthOnboardingCopy = {
   line1: 'Good food,',
   line2: 'delivered fast',
   showSpeedLines: true,
-  tagline: 'Quick delivery • Safe & reliable • 1000+ restaurants',
+  tagline: 'Quick delivery • Safe & reliable • Fresh meals',
   trust: [
     { icon: 'bolt', label: 'Lightning fast delivery' },
     { icon: 'shield', label: 'Safe & reliable' },
-    { icon: 'fork', label: '1000+ restaurants' },
+    { icon: 'fork', label: 'Full menu' },
   ],
 };
 

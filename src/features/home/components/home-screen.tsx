@@ -242,10 +242,7 @@ export function HomeScreen() {
             />
           ) : null}
           {hasError ? (
-            <ErrorState
-              message="Could not load restaurants."
-              onRetry={onRefresh}
-            />
+            <ErrorState message="Could not load menu." onRetry={onRefresh} />
           ) : null}
 
           {!isLoading && !hasError ? (

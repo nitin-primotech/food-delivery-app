@@ -1,45 +1,44 @@
 import type { ImageSource } from 'expo-image';
 
-type WelcomeFeature = {
-  icon: string;
-  label: string;
-  tint: 'success' | 'primary';
+export type WelcomeSlide = {
+  id: string;
+  image: ImageSource;
+  line1: string;
+  line2: string;
+  subheadline: string;
+  /** Normalizes artwork size when source PNG padding differs. */
+  imageScale: number;
 };
 
-type WelcomeGalleryCard = {
-  source: ImageSource;
-  glow: string;
-  rotate: string;
-  layout: 'left' | 'center' | 'right';
-};
-
-export const WELCOME_FEATURES: WelcomeFeature[] = [
-  { icon: 'bicycle', label: 'Lightning fast delivery', tint: 'success' },
-  { icon: 'shield.fill', label: 'Safe & reliable', tint: 'primary' },
+export const WELCOME_SLIDES: WelcomeSlide[] = [
   {
-    icon: 'building.columns.fill',
-    label: '1000+ restaurants',
-    tint: 'success',
+    id: 'fresh-delivery',
+    image: require('@/assets/images/Onboarding4.png'),
+    line1: 'Freshly made,',
+    line2: 'delivered to you.',
+    subheadline: 'Hot, hygienic and delivered with care, right to your door.',
+    imageScale: 1.56,
+  },
+  {
+    id: 'track-live',
+    image: require('@/assets/images/onboarding2.png'),
+    line1: 'Track every',
+    line2: 'order live.',
+    subheadline: 'Real-time tracking from our kitchen to your doorstep.',
+    imageScale: 1,
+  },
+  {
+    id: 'full-menu',
+    image: require('@/assets/images/Onboarding3.png'),
+    line1: 'Full menu,',
+    line2: 'one tap away.',
+    subheadline: 'Browse categories and order your favourites in seconds.',
+    imageScale: 1.3,
   },
 ];
 
-export const WELCOME_GALLERY: WelcomeGalleryCard[] = [
-  {
-    source: require('@/assets/foodimages/a3.png'),
-    glow: '0 14px 36px rgba(45, 106, 79, 0.28)',
-    rotate: '-11deg',
-    layout: 'left',
-  },
-  {
-    source: require('@/assets/foodimages/a1.png'),
-    glow: '0 16px 40px rgba(139, 92, 246, 0.3)',
-    rotate: '0deg',
-    layout: 'center',
-  },
-  {
-    source: require('@/assets/foodimages/a2.png'),
-    glow: '0 14px 36px rgba(236, 72, 153, 0.28)',
-    rotate: '11deg',
-    layout: 'right',
-  },
-];
+/** Shared source aspect ratio — all onboarding art is ~1023×1536. */
+export const WELCOME_ILLUSTRATION_ASPECT = 1536 / 1023;
+
+/** Max illustration height as a fraction of screen height. */
+export const WELCOME_ILLUSTRATION_MAX_HEIGHT_RATIO = 0.42;

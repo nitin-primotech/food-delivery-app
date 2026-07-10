@@ -15,7 +15,7 @@ Location runs **after** phone login (post-auth), same as the original foodRush p
 | Step | Route | Auth required |
 |---|---|---|
 | Splash | `/` (branded, then redirect) | No |
-| Welcome | `/(auth)/welcome` | No |
+| Welcome | `/(auth)/welcome` — 3-slide carousel | No |
 | Phone | `/(auth)/phone` | No |
 | OTP | `/(auth)/verify` | No |
 | Name | `/(auth)/name` | Yes |

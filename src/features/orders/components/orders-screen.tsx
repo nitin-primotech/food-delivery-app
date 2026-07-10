@@ -169,7 +169,7 @@ export function OrdersScreen() {
                 ? 'When you place an order, it will appear here.'
                 : 'Try another filter to see your orders.'
             }
-            actionLabel={orders.length === 0 ? 'Browse restaurants' : undefined}
+            actionLabel={orders.length === 0 ? 'Browse menu' : undefined}
             onAction={
               orders.length === 0 ? () => router.replace('/(tabs)') : undefined
             }

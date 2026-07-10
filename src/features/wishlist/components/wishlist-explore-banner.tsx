@@ -31,7 +31,7 @@ export function WishlistExploreBanner({
         }}
         style={styles.exploreBtn}
         accessibilityRole="button"
-        accessibilityLabel="Explore restaurants"
+        accessibilityLabel="Explore menu"
       >
         <Text style={styles.exploreText}>Explore</Text>
         <AppSymbol

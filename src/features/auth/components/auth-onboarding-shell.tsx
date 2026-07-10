@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { APP_LOGO } from '@/constants/brand-assets';
 import {
   type AuthOnboardingCopy,
   resolveAuthIcon,
@@ -105,11 +105,7 @@ export function AuthOnboardingShell({
             />
           </Pressable>
 
-          <Image
-            source={require('@/assets/images/foodrushlogo.png')}
-            style={styles.logo}
-            contentFit="contain"
-          />
+          <Image source={APP_LOGO} style={styles.logo} contentFit="contain" />
 
           <View style={styles.headlineWrap}>
             <Text style={styles.headline}>

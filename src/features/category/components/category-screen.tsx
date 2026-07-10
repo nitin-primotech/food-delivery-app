@@ -153,11 +153,11 @@ export function CategoryScreen() {
             ) : null}
 
             <View style={styles.section}>
-              <HomeSectionHeader title="Restaurants" />
+              <HomeSectionHeader title="From our kitchen" />
               {restaurants.length === 0 ? (
                 <EmptyState
                   title="Nothing here yet"
-                  message={`No restaurants found for ${categoryName.toLowerCase()}.`}
+                  message={`No dishes found in ${categoryName.toLowerCase()} right now.`}
                 />
               ) : (
                 <View style={styles.restaurantList}>

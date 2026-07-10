@@ -207,7 +207,7 @@ export function PersonalizationScreen() {
         <PremiumButton
           label={
             selectedCategories.length > 0
-              ? 'Save & explore restaurants'
+              ? 'Save & start ordering'
               : 'Continue without picks'
           }
           onPress={selectedCategories.length > 0 ? handleSave : handleSkip}

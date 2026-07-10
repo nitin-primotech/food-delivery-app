@@ -255,7 +255,7 @@ export function SearchScreen() {
             value={query}
             onChangeText={setQuery}
             onSubmitEditing={submit}
-            placeholder="Restaurants, cuisines, dishes..."
+            placeholder="Search dishes and categories..."
             placeholderTextColor={colors.textTertiary}
             style={styles.input}
             returnKeyType="search"
@@ -362,7 +362,7 @@ export function SearchScreen() {
             {!showSuggestions ? (
               <>
                 <View style={styles.section}>
-                  <HomeSectionHeader title="Popular cuisines" />
+                  <HomeSectionHeader title="Popular categories" />
                   <SearchCuisineCarousel
                     categories={categories}
                     restaurants={restaurants}
