@@ -2,18 +2,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
-import { MEMBERSHIP_PERKS } from '@/features/profile/constants/profile-hub.constants';
+import {
+  MEMBERSHIP_PERKS,
+  PROFILE_HUB_TITLES,
+} from '@/features/profile/constants/profile-hub.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { colors, gradients, shadows } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
 export function MembershipScreen() {
+  const pageTitle = PROFILE_HUB_TITLES.membership;
+
   return (
     <ProfileSubScreenShell
-      title="foodRush"
-      accentTitle="Gold"
-      subtitle="Your membership benefits"
+      title={pageTitle.title}
+      accentTitle={pageTitle.accentTitle}
+      subtitle={pageTitle.subtitle}
     >
       <LinearGradient
         colors={gradients.gold.colors}

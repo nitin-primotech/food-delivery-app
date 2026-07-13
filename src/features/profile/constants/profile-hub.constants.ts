@@ -46,6 +46,24 @@ export type SavedPaymentMethod = {
   isDefault?: boolean;
 };
 
+/** Dual-tone page titles — dark prefix + terracotta accent (matches Edit Profile, Payment Methods). */
+export const PROFILE_HUB_TITLES = {
+  wallet: {
+    title: 'My',
+    accentTitle: 'Wallet',
+    subtitle: 'Cashback, refunds and rewards',
+  },
+  offers: {
+    title: 'My',
+    accentTitle: 'Offers',
+  },
+  membership: {
+    title: 'foodRush',
+    accentTitle: 'Gold',
+    subtitle: 'Your membership benefits',
+  },
+} as const;
+
 export const WALLET_BALANCE = 250;
 
 export const SUPPORT_HOURS = '8:00 AM – 11:00 PM, every day';

@@ -106,7 +106,6 @@ export function OrderListCard({ order }: OrderListCardProps) {
           {formatDeliveryLine(order.status, order.estimatedDelivery)}
         </Text>
       </View>
-
       <View style={styles.thumbRow}>
         {visibleItems.map((line) => (
           <ProductImage

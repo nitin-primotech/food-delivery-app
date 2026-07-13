@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { formatInr } from '@/features/checkout/utils/format-currency';
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import {
+  PROFILE_HUB_TITLES,
   WALLET_BALANCE,
   WALLET_TRANSACTIONS,
 } from '@/features/profile/constants/profile-hub.constants';
@@ -11,11 +12,13 @@ import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
 export function WalletScreen() {
+  const pageTitle = PROFILE_HUB_TITLES.wallet;
+
   return (
     <ProfileSubScreenShell
-      title="foodRush"
-      accentTitle="Wallet"
-      subtitle="Cashback, refunds and rewards"
+      title={pageTitle.title}
+      accentTitle={pageTitle.accentTitle}
+      subtitle={pageTitle.subtitle}
     >
       <View style={[styles.balanceCard, shadows.card]}>
         <View style={styles.balanceIcon}>

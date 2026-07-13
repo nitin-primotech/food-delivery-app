@@ -16,7 +16,7 @@ import { hapticSoftTap } from '@/shared/haptics/feedback';
 import { colors } from '@/theme/colors';
 import { screenTopPadding } from '@/theme/screen-edge';
 import { spacing } from '@/theme/spacing';
-import { fonts } from '@/theme/typography';
+import { fonts, typography } from '@/theme/typography';
 
 type ProfileSubScreenShellProps = {
   title: string;
@@ -146,38 +146,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   titlePrefix: {
+    ...typography.sectionTitle,
     fontFamily: fonts.display,
-    fontSize: 24,
-    lineHeight: 30,
     color: colors.textPrimary,
-    letterSpacing: -0.3,
   },
   titleConnector: {
+    ...typography.sectionTitle,
     fontFamily: fonts.medium,
-    fontSize: 22,
-    lineHeight: 30,
     color: colors.textSecondary,
-    letterSpacing: 0,
   },
   titleAccent: {
+    ...typography.sectionTitle,
     fontFamily: fonts.display,
-    fontSize: 24,
-    lineHeight: 30,
     color: colors.primary,
-    letterSpacing: -0.3,
   },
   titleSingle: {
+    ...typography.sectionTitle,
     fontFamily: fonts.display,
-    fontSize: 24,
-    lineHeight: 30,
     color: colors.textPrimary,
-    letterSpacing: -0.3,
     textAlign: 'center',
   },
   subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    lineHeight: 16,
+    ...typography.caption,
     color: colors.textSecondary,
     textAlign: 'center',
   },

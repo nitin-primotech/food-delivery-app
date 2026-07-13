@@ -2,7 +2,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
-import { PROFILE_OFFERS } from '@/features/profile/constants/profile-hub.constants';
+import {
+  PROFILE_HUB_TITLES,
+  PROFILE_OFFERS,
+} from '@/features/profile/constants/profile-hub.constants';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
 import { colors, shadows } from '@/theme/colors';
@@ -10,6 +13,8 @@ import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
 export function OffersScreen() {
+  const pageTitle = PROFILE_HUB_TITLES.offers;
+
   function copyCode(code: string) {
     hapticSuccess();
     Alert.alert('Coupon copied', `${code} is ready to use at checkout.`);
@@ -17,8 +22,8 @@ export function OffersScreen() {
 
   return (
     <ProfileSubScreenShell
-      title="Your"
-      accentTitle="Offers"
+      title={pageTitle.title}
+      accentTitle={pageTitle.accentTitle}
       subtitle={`${PROFILE_OFFERS.length} coupons available`}
     >
       <View style={styles.summary}>
