@@ -4,11 +4,11 @@
     "slug": "foodRush",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/logo.png",
+      "icon": "./assets/images/app-icon.png",
       "bundleIdentifier": "com.dev.primotech.foodRush",
       "infoPlist": {
         "LSApplicationQueriesSchemes": ["tez", "phonepe", "paytmmp", "bhim"]
@@ -17,9 +17,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/logo.png",
-        "backgroundImage": "./assets/images/logo.png",
-        "monochromeImage": "./assets/images/logo.png"
+        "foregroundImage": "./assets/images/app-icon.png",
+        "backgroundImage": "./assets/images/app-icon.png",
+        "monochromeImage": "./assets/images/app-icon.png"
       },
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
@@ -46,7 +46,7 @@
         {
           "backgroundColor": "#FAF8F5",
           "android": {
-            "image": "./assets/images/logo.png",
+            "image": "./assets/images/app-icon.png",
             "imageWidth": 100
           }
         }
