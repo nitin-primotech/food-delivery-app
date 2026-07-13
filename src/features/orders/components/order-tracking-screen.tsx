@@ -22,14 +22,17 @@ import {
   formatPlacedOn,
   TRACKING_STATUS_BADGE,
 } from '@/features/orders/constants/orders.constants';
+import { isDisplayableImageUrl } from '@/lib/firebase/category-images';
 import {
   DEFAULT_DELIVERY_COORDS,
   RESTAURANT_COORDS,
 } from '@/lib/firebase/order-mapper';
 import { AppStatusBar } from '@/shared/components/app-status-bar';
 import { AppSymbol } from '@/shared/components/app-symbol';
+import { ProductImage } from '@/shared/components/product-image';
 import { RemoteImage } from '@/shared/components/remote-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
+import { useCatalogStore } from '@/store/catalog.store';
 import { selectOrders, useOrdersStore } from '@/store/orders.store';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -44,8 +47,21 @@ function OrderSummaryCard({
   showDetails: boolean;
   onToggleDetails: () => void;
 }) {
+  const catalogItems = useCatalogStore((state) => state.items);
   const statusUi = TRACKING_STATUS_BADGE[order.status];
-  const heroImage = order.items[0]?.item.image ?? order.restaurantLogo;
+  const firstItem = order.items[0]?.item;
+  const catalogMatch = firstItem
+    ? (catalogItems.find((item) => item.id === firstItem.id) ??
+      catalogItems.find(
+        (item) =>
+          item.name.trim().toLowerCase() ===
+          firstItem.name.trim().toLowerCase(),
+      ))
+    : undefined;
+  const heroImage = isDisplayableImageUrl(firstItem?.image)
+    ? (firstItem?.image as string)
+    : (catalogMatch?.image ?? '');
+  const heroCategory = firstItem?.category ?? catalogMatch?.category;
   const itemCount = countOrderItems(order.items);
   const minutesUntil = formatMinutesUntil(order.estimatedDelivery);
 
@@ -69,8 +85,9 @@ function OrderSummaryCard({
             </Text>
           </View>
         </View>
-        <RemoteImage
-          source={{ uri: heroImage }}
+        <ProductImage
+          image={heroImage}
+          categoryName={heroCategory}
           style={styles.summaryImage}
           contentFit="cover"
           recyclingKey={order.id}

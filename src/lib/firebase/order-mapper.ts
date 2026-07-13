@@ -82,7 +82,8 @@ export function mapFirestoreOrderToApp(
       name: line.name,
       description: '',
       price: line.price,
-      image: '',
+      image: line.image ?? '',
+      category: line.category,
     },
   }));
 
@@ -146,6 +147,8 @@ export function mapCartToFirestoreOrder(
       name: line.item.name,
       price: line.item.price,
       quantity: line.quantity,
+      image: line.item.image,
+      category: line.item.category,
     })),
     totalAmount: input.subtotal + input.deliveryFee + input.tip,
     status: 'placed',

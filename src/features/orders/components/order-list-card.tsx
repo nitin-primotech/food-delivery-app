@@ -9,9 +9,11 @@ import {
   formatOrderId,
   ORDER_STATUS_UI,
 } from '@/features/orders/constants/orders.constants';
+import { isDisplayableImageUrl } from '@/lib/firebase/category-images';
 import { AppSymbol } from '@/shared/components/app-symbol';
-import { RemoteImage } from '@/shared/components/remote-image';
+import { ProductImage } from '@/shared/components/product-image';
 import { hapticSoftTap } from '@/shared/haptics/feedback';
+import { useCatalogStore } from '@/store/catalog.store';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
@@ -22,8 +24,54 @@ type OrderListCardProps = {
   order: Order;
 };
 
+function resolveOrderItemImage(
+  itemId: string,
+  itemName: string,
+  image: string | undefined,
+  catalogById: Map<string, { image: string; category: string }>,
+  catalogByName: Map<string, { image: string; category: string }>,
+): string {
+  if (isDisplayableImageUrl(image)) {
+    return image as string;
+  }
+  return (
+    catalogById.get(itemId)?.image ??
+    catalogByName.get(itemName.trim().toLowerCase())?.image ??
+    ''
+  );
+}
+
+function resolveOrderItemCategory(
+  itemId: string,
+  itemName: string,
+  category: string | undefined,
+  catalogById: Map<string, { image: string; category: string }>,
+  catalogByName: Map<string, { image: string; category: string }>,
+): string | undefined {
+  if (category?.trim()) {
+    return category;
+  }
+  return (
+    catalogById.get(itemId)?.category ??
+    catalogByName.get(itemName.trim().toLowerCase())?.category
+  );
+}
+
 export function OrderListCard({ order }: OrderListCardProps) {
   const router = useRouter();
+  const catalogItems = useCatalogStore((state) => state.items);
+  const catalogById = new Map(
+    catalogItems.map((item) => [
+      item.id,
+      { image: item.image, category: item.category },
+    ]),
+  );
+  const catalogByName = new Map(
+    catalogItems.map((item) => [
+      item.name.trim().toLowerCase(),
+      { image: item.image, category: item.category },
+    ]),
+  );
   const statusUi = ORDER_STATUS_UI[order.status];
   const itemCount = countOrderItems(order.items);
   const visibleItems = order.items.slice(0, MAX_THUMBS);
@@ -61,9 +109,22 @@ export function OrderListCard({ order }: OrderListCardProps) {
 
       <View style={styles.thumbRow}>
         {visibleItems.map((line) => (
-          <RemoteImage
+          <ProductImage
             key={`${line.restaurantId}:${line.item.id}`}
-            source={{ uri: line.item.image }}
+            image={resolveOrderItemImage(
+              line.item.id,
+              line.item.name,
+              line.item.image,
+              catalogById,
+              catalogByName,
+            )}
+            categoryName={resolveOrderItemCategory(
+              line.item.id,
+              line.item.name,
+              line.item.category,
+              catalogById,
+              catalogByName,
+            )}
             style={styles.thumb}
             contentFit="cover"
             recyclingKey={`${line.restaurantId}:${line.item.id}`}
@@ -170,6 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.backgroundMuted,
+    overflow: 'hidden',
   },
   overflow: {
     width: 44,
