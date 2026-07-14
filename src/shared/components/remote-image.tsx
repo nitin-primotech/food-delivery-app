@@ -196,7 +196,6 @@ export function RemoteImage({
   ...rest
 }: RemoteImageProps) {
   const imageUri = useMemo(() => getImageUri(source), [source]);
-  console.log('imageUri: ', source);
   const frameKey =
     imageUri ??
     buildImageRecyclingKey(

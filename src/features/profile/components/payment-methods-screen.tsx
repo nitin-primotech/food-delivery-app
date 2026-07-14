@@ -1,17 +1,24 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CheckoutPaymentTrailingLogos } from '@/features/checkout/components/checkout-payment-trailing-logos';
 import { PAYMENT_METHODS } from '@/features/checkout/constants/checkout.constants';
 import { PAYMENT_BRAND_LOGOS } from '@/features/checkout/constants/payment-brands';
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import { SAVED_PAYMENT_METHODS } from '@/features/profile/constants/profile-hub.constants';
+import { AppAlertModal } from '@/shared/components/app-alert-modal';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
 import { colors, shadows } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
+
+type AlertState = {
+  title: string;
+  message: string;
+  icon: string;
+} | null;
 
 export function PaymentMethodsScreen() {
   const initialDefault =
@@ -19,6 +26,7 @@ export function PaymentMethodsScreen() {
     SAVED_PAYMENT_METHODS[0]?.id ??
     null;
   const [defaultId, setDefaultId] = useState<string | null>(initialDefault);
+  const [alert, setAlert] = useState<AlertState>(null);
 
   function setDefault(methodId: string) {
     hapticSoftTap();
@@ -28,18 +36,21 @@ export function PaymentMethodsScreen() {
 
   function handleAddMethod() {
     hapticSoftTap();
-    Alert.alert(
-      'Add payment method',
-      'New cards and UPI IDs can be added securely at checkout when you place your next order.',
-    );
+    setAlert({
+      title: 'Add payment method',
+      message:
+        'New cards and UPI IDs can be added securely at checkout when you place your next order.',
+      icon: 'plus',
+    });
   }
 
   function handleRemove(methodLabel: string) {
     hapticSoftTap();
-    Alert.alert(
-      'Remove method',
-      `${methodLabel} can be removed from your Razorpay saved methods at checkout.`,
-    );
+    setAlert({
+      title: 'Remove method',
+      message: `${methodLabel} can be removed from your Razorpay saved methods at checkout.`,
+      icon: 'creditcard.fill',
+    });
   }
 
   return (
@@ -180,6 +191,14 @@ export function PaymentMethodsScreen() {
           at checkout.
         </Text>
       </View>
+
+      <AppAlertModal
+        visible={alert != null}
+        title={alert?.title ?? ''}
+        message={alert?.message ?? ''}
+        icon={alert?.icon}
+        onClose={() => setAlert(null)}
+      />
     </ProfileSubScreenShell>
   );
 }

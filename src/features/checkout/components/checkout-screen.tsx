@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   BackHandler,
   Pressable,
   ScrollView,
@@ -30,6 +29,7 @@ import {
   deriveMrp,
   formatInr,
 } from '@/features/checkout/utils/format-currency';
+import { AppAlertModal } from '@/shared/components/app-alert-modal';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { MerchantOfflineBanner } from '@/shared/components/merchant-offline-banner';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
@@ -59,6 +59,13 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
+type AlertState = {
+  title: string;
+  message: string;
+  icon: string;
+  tone?: 'default' | 'danger';
+} | null;
+
 function RadioMark({ selected }: { selected: boolean }) {
   return (
     <View style={[styles.radio, selected && styles.radioSelected]}>
@@ -83,6 +90,7 @@ export function CheckoutScreen() {
   const merchantIsOnline = useMerchantStore(selectMerchantIsOnline);
   const [isPaying, setIsPaying] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<AlertState>(null);
 
   const [paymentId, setPaymentId] = useState('upi');
 
@@ -157,10 +165,13 @@ export function CheckoutScreen() {
     if (!restaurant || isProcessing) return;
 
     if (merchantOffline) {
-      Alert.alert(
-        'Restaurant offline',
-        'This kitchen is not accepting orders right now. Please try again later.',
-      );
+      setAlert({
+        title: 'Restaurant offline',
+        message:
+          'This kitchen is not accepting orders right now. Please try again later.',
+        icon: 'exclamationmark.triangle.fill',
+        tone: 'danger',
+      });
       return;
     }
 
@@ -181,13 +192,23 @@ export function CheckoutScreen() {
         return;
       }
       if (error instanceof RazorpayUnavailableError) {
-        Alert.alert('Payments unavailable', error.message);
+        setAlert({
+          title: 'Payments unavailable',
+          message: error.message,
+          icon: 'creditcard.fill',
+          tone: 'danger',
+        });
         return;
       }
       const message =
         error instanceof Error ? error.message : 'Payment failed. Try again.';
       setPaymentError(message);
-      Alert.alert('Payment failed', message);
+      setAlert({
+        title: 'Payment failed',
+        message,
+        icon: 'exclamationmark.triangle.fill',
+        tone: 'danger',
+      });
     } finally {
       setIsPaying(false);
     }
@@ -412,6 +433,16 @@ export function CheckoutScreen() {
         disabled={items.length === 0 || isProcessing || merchantOffline}
         onPlaceOrder={handlePlaceOrder}
         onViewPriceDetails={scrollToPriceDetails}
+      />
+
+      <AppAlertModal
+        visible={alert != null}
+        title={alert?.title ?? ''}
+        message={alert?.message ?? ''}
+        icon={alert?.icon}
+        tone={alert?.tone ?? 'default'}
+        buttonLabel="Got it"
+        onClose={() => setAlert(null)}
       />
     </View>
   );

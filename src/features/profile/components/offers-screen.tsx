@@ -1,79 +1,103 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import {
   PROFILE_HUB_TITLES,
   PROFILE_OFFERS,
 } from '@/features/profile/constants/profile-hub.constants';
+import { AppAlertModal } from '@/shared/components/app-alert-modal';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
 import { colors, shadows } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { fonts } from '@/theme/typography';
 
+type AlertState = {
+  title: string;
+  message: string;
+} | null;
+
 export function OffersScreen() {
   const pageTitle = PROFILE_HUB_TITLES.offers;
+  const [alert, setAlert] = useState<AlertState>(null);
 
   function copyCode(code: string) {
     hapticSuccess();
-    Alert.alert('Coupon copied', `${code} is ready to use at checkout.`);
+    setAlert({
+      title: 'Coupon copied',
+      message: `${code} is ready to use at checkout.`,
+    });
   }
 
   return (
-    <ProfileSubScreenShell
-      title={pageTitle.title}
-      accentTitle={pageTitle.accentTitle}
-      subtitle={`${PROFILE_OFFERS.length} coupons available`}
-    >
-      <View style={styles.summary}>
-        <AppSymbol name="tag.fill" size={18} tintColor={colors.primary} />
-        <Text style={styles.summaryText}>
-          Apply these codes on the checkout screen before you place your order.
-        </Text>
-      </View>
+    <>
+      <ProfileSubScreenShell
+        title={pageTitle.title}
+        accentTitle={pageTitle.accentTitle}
+        subtitle={`${PROFILE_OFFERS.length} coupons available`}
+      >
+        <View style={styles.summary}>
+          <AppSymbol name="tag.fill" size={18} tintColor={colors.primary} />
+          <Text style={styles.summaryText}>
+            Apply these codes on the checkout screen before you place your
+            order.
+          </Text>
+        </View>
 
-      {PROFILE_OFFERS.map((offer) => (
-        <Pressable
-          key={offer.id}
-          onPress={() => {
-            hapticSoftTap();
-            copyCode(offer.code);
-          }}
-          style={[styles.card, shadows.soft]}
-          accessibilityRole="button"
-          accessibilityLabel={`Copy offer ${offer.title}`}
-        >
-          <LinearGradient
-            colors={offer.gradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradient}
+        {PROFILE_OFFERS.map((offer) => (
+          <Pressable
+            key={offer.id}
+            onPress={() => {
+              hapticSoftTap();
+              copyCode(offer.code);
+            }}
+            style={[styles.card, shadows.soft]}
+            accessibilityRole="button"
+            accessibilityLabel={`Copy offer ${offer.title}`}
           >
-            <View style={styles.cardCopy}>
-              <Text style={styles.cardTitle}>{offer.title}</Text>
-              <Text style={styles.cardSubtitle}>{offer.subtitle}</Text>
-              <View style={styles.codePill}>
-                <Text style={styles.codeText}>{offer.code}</Text>
+            <LinearGradient
+              colors={offer.gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradient}
+            >
+              <View style={styles.cardCopy}>
+                <Text style={styles.cardTitle}>{offer.title}</Text>
+                <Text style={styles.cardSubtitle}>{offer.subtitle}</Text>
+                <View style={styles.codePill}>
+                  <Text style={styles.codeText}>{offer.code}</Text>
+                  <AppSymbol
+                    name="doc.text.fill"
+                    size={11}
+                    tintColor={colors.textInverse}
+                  />
+                </View>
+                <Text style={styles.expires}>{offer.expiresLabel}</Text>
+              </View>
+              <View style={styles.cardIcon}>
                 <AppSymbol
-                  name="doc.text.fill"
-                  size={11}
-                  tintColor={colors.textInverse}
+                  name={offer.icon}
+                  size={34}
+                  tintColor="rgba(255, 255, 255, 0.28)"
                 />
               </View>
-              <Text style={styles.expires}>{offer.expiresLabel}</Text>
-            </View>
-            <View style={styles.cardIcon}>
-              <AppSymbol
-                name={offer.icon}
-                size={34}
-                tintColor="rgba(255, 255, 255, 0.28)"
-              />
-            </View>
-          </LinearGradient>
-        </Pressable>
-      ))}
-    </ProfileSubScreenShell>
+            </LinearGradient>
+          </Pressable>
+        ))}
+      </ProfileSubScreenShell>
+
+      <AppAlertModal
+        visible={alert != null}
+        title={alert?.title ?? ''}
+        message={alert?.message ?? ''}
+        icon="checkmark.circle.fill"
+        tone="success"
+        buttonLabel="Got it"
+        onClose={() => setAlert(null)}
+      />
+    </>
   );
 }
 

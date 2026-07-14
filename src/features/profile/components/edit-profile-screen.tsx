@@ -1,17 +1,11 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  Alert,
-  Keyboard,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Keyboard, Pressable, Text, TextInput, View } from 'react-native';
 
 import { ProfileSubScreenShell } from '@/features/profile/components/profile-sub-screen-shell';
 import { editProfileStyles as styles } from '@/features/profile/constants/edit-profile.styles';
 import { formatProfilePhone } from '@/features/profile/constants/profile.constants';
+import { AppAlertModal } from '@/shared/components/app-alert-modal';
 import { AppSymbol } from '@/shared/components/app-symbol';
 import { PROFILE_SAVED_NAV_DELAY_MS } from '@/shared/components/profile-saved-toast';
 import { hapticSoftTap, hapticSuccess } from '@/shared/haptics/feedback';
@@ -34,6 +28,7 @@ export function EditProfileScreen() {
   const address = useAppStore(selectAddress);
   const [name, setName] = useState(userName ?? '');
   const [isSaving, setIsSaving] = useState(false);
+  const [helpAlertVisible, setHelpAlertVisible] = useState(false);
 
   const trimmed = name.trim();
   const canSave =
@@ -153,10 +148,7 @@ export function EditProfileScreen() {
         style={styles.secondaryBtn}
         onPress={() => {
           hapticSoftTap();
-          Alert.alert(
-            'Need help?',
-            'Contact support from Help & Support on your profile.',
-          );
+          setHelpAlertVisible(true);
         }}
         accessibilityRole="button"
       >
@@ -164,6 +156,14 @@ export function EditProfileScreen() {
           Need help with your account?
         </Text>
       </Pressable>
+
+      <AppAlertModal
+        visible={helpAlertVisible}
+        title="Need help?"
+        message="Contact support from Help & Support on your profile."
+        icon="questionmark.circle.fill"
+        onClose={() => setHelpAlertVisible(false)}
+      />
     </ProfileSubScreenShell>
   );
 }

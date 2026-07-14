@@ -46,7 +46,7 @@
         {
           "backgroundColor": "#FAF8F5",
           "android": {
-            "image": "./assets/images/app-icon.png",
+            "image": "./assets/images/logo.png",
             "imageWidth": 100
           }
         }
